@@ -101,7 +101,7 @@ jobs:
       - run: npm run build --if-present
       - run: node scripts/release-gate.mjs
   action:
-    # The composite action, run the way a user runs it (uses: ./ on a full-history checkout),
+    # The composite action, run the way a user runs it (on a full-history checkout),
     # but on the package built from this commit instead of the registry version, so a change
     # in src/ that breaks the summary, the artifact or the comment fails here before release.
     runs-on: ubuntu-latest
@@ -119,7 +119,9 @@ jobs:
       - name: Pack the package built from this commit
         id: pack
         run: echo "tgz=$RUNNER_TEMP/$(npm pack --silent --pack-destination "$RUNNER_TEMP" | tail -1)" >> "$GITHUB_OUTPUT"
-      - uses: ./
+      # $/ is GitHub's self-repository reference: the action at the commit this workflow runs, not
+      # whatever sits in the workspace (./ would load any action.yml a previous step wrote there).
+      - uses: $/
         id: workproof
         with:
           author: Efe Genc

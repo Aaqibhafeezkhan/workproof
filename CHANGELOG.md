@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.2 (unreleased)
+
+**CI runs the Action through GitHub's self-repository reference.** The `action` job now says `uses: $/` instead of
+`uses: ./`. `$/` loads `action.yml` from the commit the workflow runs; `./` loads whatever `action.yml` is in the
+workspace when the step starts, which an earlier step could have replaced. zizmor 1.30.1 reported the `./` form as
+`self-repository` and reports nothing after the change. The published package is unchanged.
+
 ## 0.6.1 (2026-10-14)
 
 **The Action can be listed on GitHub Marketplace.** Marketplace refused `action.yml` on two counts: the name `workproof` is
