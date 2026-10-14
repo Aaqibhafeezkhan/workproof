@@ -7,6 +7,13 @@
 workspace when the step starts, which an earlier step could have replaced. zizmor 1.30.1 reported the `./` form as
 `self-repository` and reports nothing after the change. The published package is unchanged.
 
+**The tarball smoke test installs with `npm ci`.** `scripts/smoke-tarball.sh` ran `npm install` on the packed tarball, so
+its dependencies were resolved fresh from the registry: on 2026-10-14 that gave `surviving-lines` 0.1.8 while
+`package-lock.json` and the test suite use 0.1.7. `scripts/smoke-lockfile.mjs` now writes a lockfile for the empty
+project from this repository's `package-lock.json`, and the install is `npm ci`, which stops with `EINTEGRITY` when a
+registry tarball does not match the recorded sha512. OpenSSF Scorecard reported the `npm install` line as an unpinned
+dependency.
+
 ## 0.6.1 (2026-10-14)
 
 **The Action can be listed on GitHub Marketplace.** Marketplace refused `action.yml` on two counts: the name `workproof` is
