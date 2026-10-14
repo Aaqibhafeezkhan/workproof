@@ -306,7 +306,9 @@ rozet yalnızca onu bulma yoludur.
 
 Depo, bir checkout üzerinde workproof'u çalıştıran, `check` yapan, in-toto beyanını yazan ve
 pull request'e başlık figürleriyle tek bir yapışkan yorum bırakan bir composite action
-içerir. `fetch-depth: 0` zorunludur, yoksa figürlerin geldiği geçmiş eksiktir; `author`
+içerir. `fetch-depth: 0` zorunludur: sığ (shallow) bir klonda mevcut en eski commit, kendisinden
+eski her satırın sahibi sayılır; bu yüzden workproof (CLI, `verify` ve action) rapor yazmak
+yerine `git fetch --unshallow` komutunu adıyla veren bir hatayla durur. `author`
 zorunludur, çünkü bir GitHub kullanıcı adı commit kimliklerine güvenilir biçimde eşlenmez.
 
 ```yaml

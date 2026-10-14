@@ -1,5 +1,5 @@
 import { analyseRepo, fingerprint } from "./analyse.js";
-import { headSha, rootCommit, remoteUrl } from "./git.js";
+import { headSha, rootCommit, remoteUrl, assertRepository, assertNotShallow } from "./git.js";
 import { hashOf } from "./report.js";
 import { validateReport } from "./schema.js";
 import type { Report } from "./report.js";
@@ -47,6 +47,10 @@ export async function verifyReport(report: Report, repoDirs: string[], opts: { f
   if (!integrity.ok) return { ok: false, integrity, fingerprints, rows, headMoved };
   for (const [i, expected] of report.repositories.entries()) {
     const dir = repoDirs[i] ?? repoDirs[0] ?? process.cwd();
+    // Before the fingerprint: a shallow clone's root is its boundary commit, so the fingerprint
+    // would differ and the message would wrongly say it is a different repository.
+    await assertRepository(dir);
+    await assertNotShallow(dir);
     const key = opts.fingerprintKey ?? report.params.fingerprintKey;
     const compared = !expected.fingerprintKeyed || key !== undefined;
     const match = compared ? fingerprint(await rootCommit(dir), await remoteUrl(dir), expected.fingerprintKeyed ? key : undefined) === expected.fingerprint : false;

@@ -160,6 +160,23 @@ export async function configuredName(cwd: string): Promise<string> {
 export async function assertRepository(cwd: string): Promise<void> {
   try { await git(["rev-parse", "--is-inside-work-tree"], cwd); } catch { throw new Error(`${cwd} is not inside a git repository (use --repo to point at one)`); }
 }
+/**
+ * A shallow clone ends at a boundary commit that appears to add every line it did not see
+ * change, so blame credits that commit's author with all of them, and tenure starts at the
+ * boundary instead of the first commit. Which way the figures move depends on who wrote the
+ * boundary commit. Measured on this repository at 0.5.1 (2026-10-14), --depth 8 against a
+ * full clone: surviving lines 32 of 8,572 against 7,776 of 8,572, files authored 0 of 83
+ * against 78 of 83, tenure from 2026-09-22 against 2026-09-05. No figure is right, so
+ * nothing is reported.
+ */
+export async function assertNotShallow(cwd: string): Promise<void> {
+  const shallow = (await git(["rev-parse", "--is-shallow-repository"], cwd)).trim();
+  if (shallow === "true") {
+    throw new Error(
+      `${cwd} is a shallow clone, so the history is cut off and every figure would be wrong (blame credits the oldest commit present with every line older than it). Fetch the full history with \`git fetch --unshallow\` and run again; in GitHub Actions, check out with \`fetch-depth: 0\`.`,
+    );
+  }
+}
 /** linguist-generated and linguist-vendored from .gitattributes, for the given paths. */
 export async function checkAttr(cwd: string, paths: string[]): Promise<Map<string, { generated: boolean; vendored: boolean }>> {
   const out = new Map<string, { generated: boolean; vendored: boolean }>();

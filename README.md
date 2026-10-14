@@ -406,9 +406,10 @@ reader verifies, the badge is only how they find it.
 The repository ships a composite action that runs workproof on a checkout, runs `check`,
 writes the in-toto statement, puts the Markdown report in the job summary, uploads the
 report files as one artifact, and posts one sticky comment on the pull request with the
-headline figures. `fetch-depth: 0` is required, or the history the figures come from is
-missing; `author` is required because a GitHub login does not map reliably onto commit
-identities.
+headline figures. `fetch-depth: 0` is required: on a shallow clone the oldest commit
+present takes credit for every line older than it, so workproof (the CLI, `verify` and the
+action alike) stops with an error naming `git fetch --unshallow` instead of writing a report.
+`author` is required because a GitHub login does not map reliably onto commit identities.
 
 ```yaml
 name: workproof

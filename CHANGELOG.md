@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0 (unreleased)
+
+**A shallow clone is refused instead of reported.** On a shallow clone the boundary commit looks as
+if it added every line older than it, so blame credited its author with all of them and tenure began
+at the boundary. The tool exited 0 and wrote the report anyway. Measured on this repository at 0.5.1
+with `git clone --depth 8` against a full clone: surviving lines 32 of 8,572 against 7,776 of 8,572,
+files authored 0 of 83 against 78 of 83, tenure from 2026-09-22 against 2026-09-05. Which way the
+figures move depends on who wrote the boundary commit. `analyse`, `verify` and the Action now stop
+with an error that names `git fetch --unshallow` and `fetch-depth: 0`, and exit 1. `verify` checks
+before the fingerprint, because a shallow clone's root commit is its boundary and the old message
+would have called it a different repository. There is no flag to run anyway: no figure from a
+shallow clone is right. The report's shape is unchanged, and the pinned reproducibility hash is the
+same.
+
 ## 0.5.1 (2026-10-14)
 
 **The npm 12 fix had no test that could tell whether it was being exercised.** `extractPackedFiles`

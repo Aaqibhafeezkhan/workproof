@@ -145,3 +145,31 @@ test("--badge writes a shields.io endpoint document built from the first reposit
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("a shallow clone is refused by analyse, verify and the CLI, naming the fix", async () => {
+  const full = await makeRepo();
+  const shallow = `${full}-shallow`;
+  try {
+    // A shallow clone's boundary commit owns every line it did not see change, so the
+    // figures come out inflated and the tenure starts late. It must stop, not report.
+    execFileSync("git", ["clone", "-q", "--depth", "9", `file://${full}`, shallow]);
+    assert.equal(execFileSync("git", ["rev-parse", "--is-shallow-repository"], { cwd: shallow, encoding: "utf8" }).trim(), "true");
+    await assert.rejects(analyseRepo(shallow, params), /shallow clone[\s\S]*git fetch --unshallow[\s\S]*fetch-depth: 0/);
+    const report = buildReport([await analyseRepo(full, params)], params, { version: "0.6.0", generatedAt: "2026-10-14T00:00:00Z" });
+    await assert.rejects(verifyReport(report, [shallow]), /shallow clone[\s\S]*git fetch --unshallow/);
+    const cli = join(process.cwd(), "dist/src/cli.js");
+    let failed: { status?: number; stderr?: string } | undefined;
+    try {
+      execFileSync("node", [cli, "--repo", shallow, "--author", "ada@example.com", "--out", join(shallow, "r")], { encoding: "utf8", stdio: "pipe" });
+    } catch (err) {
+      failed = err as { status?: number; stderr?: string };
+    }
+    assert.ok(failed, "the CLI exited 0 on a shallow clone");
+    assert.equal(failed.status, 1);
+    assert.match(failed.stderr ?? "", /git fetch --unshallow/);
+    assert.match(failed.stderr ?? "", /fetch-depth: 0/);
+  } finally {
+    await rm(full, { recursive: true, force: true });
+    await rm(shallow, { recursive: true, force: true });
+  }
+});

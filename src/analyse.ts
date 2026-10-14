@@ -3,7 +3,7 @@ import { basename } from "node:path";
 import { createRequire } from "node:module";
 import { access } from "node:fs/promises";
 import { join } from "node:path";
-import { listCommits, listTags, rootCommit, headSha, remoteUrl, assertRepository, gitVersion, checkAttr, listHeadFiles } from "./git.js";
+import { listCommits, listTags, rootCommit, headSha, remoteUrl, assertRepository, assertNotShallow, gitVersion, checkAttr, listHeadFiles } from "./git.js";
 import type { Commit } from "./git.js";
 import { isBot, excludedSet } from "./exclusions.js";
 // surviving-lines ships plain ESM JavaScript without type declarations.
@@ -126,6 +126,7 @@ async function applyExclusions(cwd: string, all: Commit[], params: Params) {
 export async function analyseRepo(cwd: string, params: Params, hooks: AnalyseHooks = {}): Promise<RepoReport> {
   const say = hooks.progress ?? (() => {});
   await assertRepository(cwd);
+  await assertNotShallow(cwd);
   const key = params.fingerprintKey ?? newFingerprintKey();
   if (!params.fingerprintKey) say(`fingerprint key ${key} (keep it to compare reports; it is not stored)`);
   say(`${basename(cwd)}: reading history${params.maxCommits ? ` (newest ${params.maxCommits} commits)` : ""}...`);
