@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://workproof.dev/schema/report-2.json",
+  "$id": "https://raw.githubusercontent.com/Bubblegunn/workproof/main/schema/report.schema.json",
   "title": "workproof report",
   "description": "A verifiable engineering report for one author. hash is sha256 over the RFC 8785 canonical JSON of { params, repositories }.",
   "type": "object",

@@ -64,7 +64,7 @@ runs:
         set -euo pipefail
         cosign attest-blob workproof-report.json \
           --predicate workproof-report.predicate.json \
-          --type https://workproof.dev/attestation/v1 \
+          --type https://github.com/Bubblegunn/workproof/blob/main/docs/attestation-v1.md \
           --bundle workproof-report.sigstore.json \
           --yes
         echo "bundle=workproof-report.sigstore.json" >> "$GITHUB_OUTPUT"

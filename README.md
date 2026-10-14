@@ -315,10 +315,14 @@ In the GitHub Action, `attest: "true"` signs the same statement keylessly with
 ```
 cosign verify-blob-attestation workproof-report.json \
   --bundle workproof-report.sigstore.json \
-  --type https://workproof.dev/attestation/v1 \
+  --type https://github.com/Bubblegunn/workproof/blob/main/docs/attestation-v1.md \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   --certificate-identity-regexp '^https://github.com/<owner>/<repo>/'
 ```
+
+The predicate type is described in [docs/attestation-v1.md](docs/attestation-v1.md). Bundles
+written before 0.6.0 carry the older type `https://workproof.dev/attestation/v1`; pass that value
+to `--type` to verify them.
 
 What that proves: this exact JSON was produced by a workflow run in that repository, at
 that commit, and has not changed since. What it does not prove: that the figures are

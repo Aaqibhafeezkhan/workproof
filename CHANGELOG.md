@@ -14,6 +14,19 @@ would have called it a different repository. There is no flag to run anyway: no 
 shallow clone is right. The report's shape is unchanged, and the pinned reproducibility hash is the
 same.
 
+**The attestation predicate type and the schema `$id` moved off `workproof.dev`.** The project never
+registered that domain; on 2026-10-14 the .dev registry's RDAP answered "not found", so anyone could
+have bought it and served a different predicate definition or schema at those URIs. The predicate
+type is now `https://github.com/Bubblegunn/workproof/blob/main/docs/attestation-v1.md`, a page that
+describes every predicate field, and the schema `$id` is
+`https://raw.githubusercontent.com/Bubblegunn/workproof/main/schema/report.schema.json`. The Action
+signs with the new type. The report hash does not change: neither URI is part of the hashed content,
+and the same repository with the same fingerprint key hashed `d940b98b...` under both 0.5.1 and this
+build; `check` from this build accepts the 0.5.1 report. Statements written before 0.6.0 keep the
+old type, with the same subject digest and the same predicate fields. To verify a Sigstore bundle
+written before 0.6.0, pass `--type https://workproof.dev/attestation/v1` to `cosign
+verify-blob-attestation`; the README says so beside the command.
+
 ## 0.5.1 (2026-10-14)
 
 **The npm 12 fix had no test that could tell whether it was being exercised.** `extractPackedFiles`

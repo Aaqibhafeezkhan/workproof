@@ -4,7 +4,7 @@ import { rm, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { makeRepo } from "./fixture.js";
-import { analyseRepo, buildReport } from "../src/index.js";
+import { analyseRepo, buildReport, checkReport } from "../src/index.js";
 import { statementFor, writeStatement, signLocal, PREDICATE_TYPE } from "../src/attest.js";
 
 const params = { author: ["ada@example.com"], depth: 2, threshold: 0.5, minCommits: 1, paths: true, emails: false, sample: 1, fingerprintKey: "ab".repeat(16) };
@@ -68,6 +68,43 @@ test("attest writes the statement and an ssh-keygen signature that check-novalid
     const cli = join(process.cwd(), "dist/src/cli.js");
     const out = execFileSync("node", [cli, "attest", join(dir, "r.json"), "--local", join(dir, "key")], { encoding: "utf8" });
     assert.match(out, /wrote .*r\.intoto\.json, .*r\.predicate\.json, .*r\.intoto\.json\.sig and .*r\.dsse\.json/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("the predicate type and the schema $id are URIs under the project's own GitHub repository", async () => {
+  // workproof.dev was never registered; anyone could have bought it and served a different
+  // predicate definition or schema at those URIs. Both identifiers now live under
+  // github.com/Bubblegunn/workproof, which only the project can write to.
+  const owned = /^https:\/\/(github\.com|raw\.githubusercontent\.com)\/Bubblegunn\/workproof\//;
+  assert.match(PREDICATE_TYPE, owned);
+  const schema = JSON.parse(await readFile(join(process.cwd(), "schema/report.schema.json"), "utf8"));
+  assert.match(schema.$id, owned);
+  // The predicate type must resolve to a file in this repository that describes the predicate.
+  const doc = PREDICATE_TYPE.replace(/^https:\/\/github\.com\/Bubblegunn\/workproof\/blob\/main\//, "");
+  assert.notEqual(doc, PREDICATE_TYPE, "predicate type is a blob URL on main");
+  assert.match(await readFile(join(process.cwd(), doc), "utf8"), /predicateType/);
+  // No shipped identifier may point back at the unregistered domain.
+  for (const f of ["src/attest.ts", "schema/report.schema.json", "action.yml"]) {
+    const text = await readFile(join(process.cwd(), f), "utf8");
+    assert.ok(!text.includes("workproof.dev"), `${f} still names workproof.dev`);
+  }
+});
+
+test("a statement written before 0.6.0, with the old predicate type, still binds to a report that checks", async () => {
+  const dir = await makeRepo();
+  try {
+    const report = buildReport([await analyseRepo(dir, params)], params, { version: "0.5.1", generatedAt: "2026-10-14T00:00:00Z" });
+    // Only the predicate type moved; the subject is the report hash, and the hash covers neither URI.
+    const old = { ...statementFor(report), predicateType: "https://workproof.dev/attestation/v1" };
+    assert.equal(checkReport(report).ok, true);
+    assert.equal(old.subject[0]!.digest.sha256, report.hash);
+    assert.equal(old.subject[0]!.digest.sha256, checkReport(report).hash.computed);
+    assert.deepEqual(old.predicate, statementFor(report).predicate);
+    await writeFile(join(dir, "r.json"), JSON.stringify(report));
+    const cli = join(process.cwd(), "dist/src/cli.js");
+    assert.match(execFileSync("node", [cli, "check", join(dir, "r.json")], { encoding: "utf8" }), new RegExp(`hash ok ${report.hash}`));
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

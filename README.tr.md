@@ -216,10 +216,14 @@ doğrular:
 ```
 cosign verify-blob-attestation workproof-report.json \
   --bundle workproof-report.sigstore.json \
-  --type https://workproof.dev/attestation/v1 \
+  --type https://github.com/Bubblegunn/workproof/blob/main/docs/attestation-v1.md \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   --certificate-identity-regexp '^https://github.com/<owner>/<repo>/'
 ```
+
+Predicate türü [docs/attestation-v1.md](docs/attestation-v1.md) içinde anlatılır. 0.6.0'dan önce
+yazılan paketler eski türü, `https://workproof.dev/attestation/v1` değerini taşır; onları
+doğrulamak için `--type` olarak bu değeri verin.
 
 Bunun kanıtladığı: bu JSON tam olarak o depoda, o commit'te çalışan bir iş akışı tarafından
 üretildi ve o zamandan beri değişmedi. Kanıtlamadığı: figürlerin doğru olduğu (bunun için

@@ -12,7 +12,12 @@ const run = (cmd: string, args: string[]) =>
   });
 
 export const STATEMENT_TYPE = "https://in-toto.io/Statement/v1";
-export const PREDICATE_TYPE = "https://workproof.dev/attestation/v1";
+/**
+ * A URI the project controls, describing the predicate. Statements written before 0.6.0 carry a
+ * predicate type on a domain the project never registered (CHANGELOG 0.6.0 names it); nothing in
+ * check or verify reads a statement, so those older statements and their reports still check.
+ */
+export const PREDICATE_TYPE = "https://github.com/Bubblegunn/workproof/blob/main/docs/attestation-v1.md";
 export const PAYLOAD_TYPE = "application/vnd.in-toto+json";
 
 export interface InTotoStatement {
