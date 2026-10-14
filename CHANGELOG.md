@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.2 (unreleased)
+## 0.6.2 (2026-10-14)
 
 **CI runs the Action through GitHub's self-repository reference.** The `action` job now says `uses: $/` instead of
 `uses: ./`. `$/` loads `action.yml` from the commit the workflow runs; `./` loads whatever `action.yml` is in the

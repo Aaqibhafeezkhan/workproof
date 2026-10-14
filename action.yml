@@ -23,7 +23,7 @@ inputs:
   version:
     description: workproof version to run.
     required: false
-    default: "0.6.1"
+    default: "0.6.2"
   package:
     description: A local workproof package to run instead of the registry version, as a path to an npm pack tarball. Empty by default, which runs workproof@<version> from npm. This repository's CI sets it to the tarball built from the commit under test.
     required: false

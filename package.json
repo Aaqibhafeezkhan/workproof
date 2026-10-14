@@ -1,6 +1,6 @@
 {
   "name": "workproof",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Turn a private git repository into a verifiable engineering report for one author, without showing any code: thirteen figures from git, a hash anyone can recompute offline, verify, and an in-toto attestation.",
   "type": "module",
   "main": "./dist/src/index.js",
