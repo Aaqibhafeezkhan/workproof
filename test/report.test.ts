@@ -42,7 +42,8 @@ test("the key is printed once, never stored, and two reports of one repository m
     const noreply = await analyseRepo(dir, { ...params, author: ["dependabot[bot]"], emails: true, exclusions: false });
     assert.deepEqual(noreply.identity.emails, ["(github noreply)"]);
     const rep = buildReport([noreply], { ...params, author: ["49699333+dependabot[bot]@users.noreply.github.com"], emails: true, exclusions: false }, { version: "0.2.0", generatedAt: "2026-09-05T00:00:00Z" });
-    assert.ok(!JSON.stringify(rep).includes("users.noreply.github.com"));
+    // Checked as an address (the "@" is part of it): no email at the noreply domain is in the report.
+    assert.ok(!JSON.stringify(rep).includes("@users.noreply.github.com"), "a GitHub noreply address leaked into the report");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
