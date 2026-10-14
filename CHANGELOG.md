@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.1 (unreleased)
+## 0.6.1 (2026-10-14)
 
 **The Action can be listed on GitHub Marketplace.** Marketplace refused `action.yml` on two counts: the name `workproof` is
 already a GitHub user's name, and the description was 232 characters where Marketplace accepts fewer than 125. The Action is
