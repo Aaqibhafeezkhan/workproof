@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0 (unreleased)
+## 0.6.0 (2026-10-14)
 
 **A shallow clone is refused instead of reported.** On a shallow clone the boundary commit looks as
 if it added every line older than it, so blame credited its author with all of them and tenure began
