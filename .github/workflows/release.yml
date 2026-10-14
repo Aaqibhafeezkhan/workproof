@@ -35,6 +35,68 @@ jobs:
         env:
           TAG: ${{ github.ref_name }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  assets:
+    # The npm tarball and a build-provenance attestation of it, attached to the GitHub release, so
+    # a reader of the release can check what was published with `gh attestation verify`. The
+    # tarball is rebuilt from the tag and must have the same sha512 as the one npm serves; a
+    # mismatch fails here and nothing is attached.
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # gh release upload
+      id-token: write # Sigstore signing certificate for the attestation
+      attestations: write # store the attestation on this repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false # a release builds from a clean install; nothing cached can reach it
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Pack, and compare with the tarball npm serves
+        id: pack
+        run: |
+          set -eu
+          v="${TAG#v}"
+          tgz=$(npm pack --silent | tail -1)
+          test "$tgz" = "$PKG-$v.tgz" || { echo "npm pack wrote $tgz, expected $PKG-$v.tgz"; exit 1; }
+          local_integrity="sha512-$(openssl dgst -sha512 -binary "$tgz" | base64 -w0)"
+          # The registry can take minutes to answer for a version it just accepted; same budget as smoke.
+          attempts=15
+          delay=20
+          i=1
+          remote=""
+          while [ "$i" -le "$attempts" ]; do
+            if remote=$(npm view "$PKG@$v" dist.integrity 2>/dev/null) && [ -n "$remote" ]; then break; fi
+            i=$((i + 1))
+            if [ "$i" -le "$attempts" ]; then sleep "$delay"; fi
+          done
+          echo "local:    $local_integrity"
+          echo "registry: $remote"
+          test "$local_integrity" = "$remote" || { echo "the rebuilt tarball is not the published one; not attesting it"; exit 1; }
+          echo "tgz=$tgz" >> "$GITHUB_OUTPUT"
+        env:
+          TAG: ${{ github.ref_name }}
+          PKG: ${{ github.event.repository.name }}
+      - name: Attest build provenance of the tarball
+        id: attest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ steps.pack.outputs.tgz }}
+          create-storage-record: false # storage records are for registry images; this is a file
+      - name: Attach the tarball and its attestation bundle to the release
+        run: |
+          set -eu
+          cp "$BUNDLE" "$TGZ.sigstore.json"
+          gh release upload "$TAG" "$TGZ" "$TGZ.sigstore.json"
+        env:
+          TAG: ${{ github.ref_name }}
+          TGZ: ${{ steps.pack.outputs.tgz }}
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+          GH_TOKEN: ${{ github.token }}
   smoke:
     # The published package, installed from the registry on three operating systems, reports the released version.
     needs: publish
@@ -47,6 +109,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
+          package-manager-cache: false # no checkout here, and nothing cached should reach a release check
       - name: npx the released version from the registry
         shell: bash
         run: |

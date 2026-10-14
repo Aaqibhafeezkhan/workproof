@@ -42,6 +42,16 @@ byte-identical to the old script's on a real report. Every field it reads must e
 0, and the new one exits 1 and names the figure and the field. Renaming that field consistently in
 `src/` leaves the CLI working and fails the new job.
 
+**Each GitHub release carries the npm tarball and a build-provenance attestation of it.** A new
+`assets` job in the release workflow rebuilds the tarball from the tag, refuses to continue unless
+its sha512 equals the `dist.integrity` npm serves for that version, attests it with
+`actions/attest-build-provenance` (pinned by commit), and uploads `workproof-X.Y.Z.tgz` and
+`workproof-X.Y.Z.tgz.sigstore.json` to the release. `gh attestation verify workproof-X.Y.Z.tgz -R
+Bubblegunn/workproof` checks it. Only that job holds `id-token: write` and `attestations: write`.
+Releases up to 0.5.1 had no assets, which is why OpenSSF Scorecard reported "no releases found" for
+signed releases. The smoke job's `setup-node` now sets `package-manager-cache: false`, as the publish
+job already did; zizmor reported the omission as a cache-poisoning finding.
+
 ## 0.5.1 (2026-10-14)
 
 **The npm 12 fix had no test that could tell whether it was being exercised.** `extractPackedFiles`
