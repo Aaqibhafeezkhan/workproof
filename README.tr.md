@@ -9,6 +9,7 @@
   <img src="https://img.shields.io/github/stars/Bubblegunn/workproof?style=flat-square&color=111111" alt="stars">
   <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
   <a href="https://github.com/marketplace/actions/workproof-report"><img src="https://img.shields.io/badge/GitHub_Marketplace-workproof--report-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
+  <a href="https://www.bestpractices.dev/projects/15493"><img src="https://img.shields.io/cii/level/15493?style=flat-square&color=111111&label=openssf%20best%20practices" alt="OpenSSF Best Practices"></a>
 </p>
 
 workproof, bir git deposunu tek bir yazar için doğrulanabilir bir mühendislik raporuna
