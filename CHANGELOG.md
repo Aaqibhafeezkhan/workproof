@@ -52,6 +52,11 @@ Releases up to 0.5.1 had no assets, which is why OpenSSF Scorecard reported "no 
 signed releases. The smoke job's `setup-node` now sets `package-manager-cache: false`, as the publish
 job already did; zizmor reported the omission as a cache-poisoning finding.
 
+**Breaking: Node 22 or newer is required.** `engines.node` moved from `>=20` to `>=22`, because
+Node 20 reached end of life on 2026-04-30 and gets no security fixes. CI no longer tests Node 20; the
+matrix is 22 and 24 on Linux, plus 24 on Windows and macOS. npm warns when installing on Node 20 and
+does not refuse; nothing in the code was changed to stop it running there, but it is no longer tested.
+
 ## 0.5.1 (2026-10-14)
 
 **The npm 12 fix had no test that could tell whether it was being exercised.** `extractPackedFiles`

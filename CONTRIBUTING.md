@@ -9,7 +9,7 @@ npm ci
 npm test        # tsc build, then node:test over the compiled tests (fixture repositories built in a temp dir)
 ```
 
-Node 20 or newer and git are required. Note that Node 20's test runner does not expand glob patterns, so test files are named explicitly in `package.json`.
+Node 22 or newer and git are required. Test files are named explicitly in `package.json`, and `test/suite.test.mjs` fails if a test file on disk is not named there.
 
 ## Adding to the tool
 

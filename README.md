@@ -26,7 +26,7 @@ cd your-private-repo
 npx workproof
 ```
 
-That writes `workproof-report.md` (paste it into a résumé, a portfolio, a visa
+It needs Node 22 or newer and git. That writes `workproof-report.md` (paste it into a résumé, a portfolio, a visa
 application) and `workproof-report.json` (for tools, and for verification). This is the
 real transcript of the run behind the example below, on a clone of
 [langchain-ai/openwiki](https://github.com/langchain-ai/openwiki) at `1e6d54c`:

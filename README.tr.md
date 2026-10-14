@@ -23,7 +23,7 @@ cd your-private-repo
 npx workproof
 ```
 
-Bu, `workproof-report.md` (bir özgeçmişe, portfolyoya, vize başvurusuna yapıştırın) ve
+Node 22 veya daha yenisi ve git gerekir. Bu, `workproof-report.md` (bir özgeçmişe, portfolyoya, vize başvurusuna yapıştırın) ve
 `workproof-report.json` (araçlar ve doğrulama için) dosyalarını yazar. Aşağıdaki örneğin
 arkasındaki gerçek çalıştırma, [langchain-ai/openwiki](https://github.com/langchain-ai/openwiki)
 deposunun `1e6d54c` sürümünde:
