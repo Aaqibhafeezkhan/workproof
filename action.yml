@@ -1,5 +1,5 @@
-name: workproof
-description: Run workproof on the checked-out repository, run check, write the in-toto statement, put the Markdown report in the job summary, upload the report files as an artifact, and post the headline figures as a sticky pull-request comment.
+name: workproof report
+description: 'Writes a verifiable report of one author''s work in this repository, with a job summary and an optional signed attestation.'
 author: Efe Genc
 branding:
   icon: check-square

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1 (unreleased)
+
+**The Action can be listed on GitHub Marketplace.** Marketplace refused `action.yml` on two counts: the name `workproof` is
+already a GitHub user's name, and the description was 232 characters where Marketplace accepts fewer than 125. The Action is
+now called `workproof report` and the description is 122 characters. `uses: Bubblegunn/workproof@v0` is unchanged, since a
+workflow refers to the repository, not the name. A test now fails on a description of 125 characters or more.
+
 ## 0.6.0 (2026-10-14)
 
 **A shallow clone is refused instead of reported.** On a shallow clone the boundary commit looks as
