@@ -27,6 +27,21 @@ old type, with the same subject digest and the same predicate fields. To verify 
 written before 0.6.0, pass `--type https://workproof.dev/attestation/v1` to `cosign
 verify-blob-attestation`; the README says so beside the command.
 
+**The Action declares its outputs.** It wrote `report=` and `bundle=` to `$GITHUB_OUTPUT` with no
+step `id` and no top-level `outputs:` block, so a composite action's caller could not read either.
+`steps.<id>.outputs.report` and `steps.<id>.outputs.bundle` now work, and a test fails if any key
+written to `$GITHUB_OUTPUT` is not declared and mapped to its step's id.
+
+**The Action is run in CI against the commit under test.** A new `action` job checks out the full
+history, packs the package built from that commit, runs `uses: ./` on it through a new `package`
+input (empty by default, so users still get `workproof@<version>` from npm), downloads the uploaded
+artifact, runs `check` on it, and renders the pull-request comment. The comment is built by
+`scripts/action-comment.mjs` instead of a `node -e` string inside `action.yml`; its output is
+byte-identical to the old script's on a real report. Every field it reads must exist: with
+`cadence.activeWeeks` renamed in a report, the old script printed `undefined active weeks` and exited
+0, and the new one exits 1 and names the figure and the field. Renaming that field consistently in
+`src/` leaves the CLI working and fails the new job.
+
 ## 0.5.1 (2026-10-14)
 
 **The npm 12 fix had no test that could tell whether it was being exercised.** `extractPackedFiles`

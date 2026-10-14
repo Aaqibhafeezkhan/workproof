@@ -347,6 +347,23 @@ yerinde güncellenir (bir işaret taşır) ve `workproof-report.json`, `.intoto.
 `.predicate.json` bir `upload-artifact` adımı için çalışma alanında kalır. Yalnızca dosyaları
 üretmek için `comment: "false"` verin.
 
+Action iki çıktı tanımlar: `report`, JSON raporunun yolu, ve `bundle`, `attest: "true"`
+olduğunda Sigstore paketinin yolu (aksi halde boş). Okumak için adıma bir `id` verin:
+
+```yaml
+      - uses: Bubblegunn/workproof@v0
+        id: workproof
+        with:
+          author: ada@example.com
+      - run: npx workproof check "$REPORT"
+        env:
+          REPORT: ${{ steps.workproof.outputs.report }}
+```
+
+`package` girdisi, kayıt defterindeki `workproof@<version>` yerine yerel bir npm pack
+arşivini çalıştırır. Bu deponun CI'ı, action'ı test edilen commit'ten derlenen paketle
+çalıştırmak için kullanır; yayımlanmış sürümü almak için boş bırakın.
+
 ## Oyun ve yanlılık
 
 Kısmen oyunlanabilir; rapor, oyunun görünmesi için tasarlandı. Bir sayıya güvenmeden önce

@@ -448,6 +448,24 @@ and `workproof-report.md`, `.json`, `.intoto.json` and `.predicate.json` are upl
 `workproof-report` artifact, so a report survives the workspace and can be downloaded from
 the run. Set `comment: "false"` to skip the comment and keep the summary and the artifact.
 
+The action declares two outputs: `report`, the path of the JSON report, and `bundle`, the
+path of the Sigstore bundle when `attest: "true"` (empty otherwise). Give the step an `id` to
+read them:
+
+```yaml
+      - uses: Bubblegunn/workproof@v0
+        id: workproof
+        with:
+          author: ada@example.com
+      - run: npx workproof check "$REPORT"
+        env:
+          REPORT: ${{ steps.workproof.outputs.report }}
+```
+
+The `package` input runs a local npm pack tarball instead of `workproof@<version>` from the
+registry. This repository's CI uses it to run the action on the package built from the commit
+under test; leave it empty to get the released version.
+
 ## Gaming and bias
 
 Partly gameable, and built so the gaming shows. `npm run bench:adversarial` applies four

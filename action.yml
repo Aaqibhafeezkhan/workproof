@@ -24,20 +24,37 @@ inputs:
     description: workproof version to run.
     required: false
     default: "0.5.1"
+  package:
+    description: A local workproof package to run instead of the registry version, as a path to an npm pack tarball. Empty by default, which runs workproof@<version> from npm. This repository's CI sets it to the tarball built from the commit under test.
+    required: false
+    default: ""
+outputs:
+  report:
+    description: Path of the JSON report, workproof-report.json, relative to the workspace.
+    value: ${{ steps.run.outputs.report }}
+  bundle:
+    description: Path of the Sigstore bundle, workproof-report.sigstore.json, when attest is "true"; empty otherwise.
+    value: ${{ steps.sigstore.outputs.bundle }}
 runs:
   using: composite
   steps:
     - name: Run workproof
+      id: run
       shell: bash
       env:
         WP_VERSION: ${{ inputs.version }}
+        WP_PACKAGE: ${{ inputs.package }}
         WP_AUTHOR: ${{ inputs.author }}
         WP_SAMPLE: ${{ inputs.sample }}
       run: |
         set -euo pipefail
-        npx --yes "workproof@${WP_VERSION}" --repo . --author "${WP_AUTHOR}" --sample "${WP_SAMPLE}" --out workproof-report
-        npx --yes "workproof@${WP_VERSION}" check workproof-report.json
-        npx --yes "workproof@${WP_VERSION}" attest workproof-report.json
+        wp() {
+          if [ -n "${WP_PACKAGE}" ]; then npx --yes --package "${WP_PACKAGE}" workproof "$@"
+          else npx --yes "workproof@${WP_VERSION}" "$@"; fi
+        }
+        wp --repo . --author "${WP_AUTHOR}" --sample "${WP_SAMPLE}" --out workproof-report
+        wp check workproof-report.json
+        wp attest workproof-report.json
         echo "report=workproof-report.json" >> "$GITHUB_OUTPUT"
     - name: Write the report to the job summary
       shell: bash
@@ -58,6 +75,7 @@ runs:
       if: ${{ inputs.attest == 'true' }}
       uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
     - name: Attest the report with Sigstore
+      id: sigstore
       if: ${{ inputs.attest == 'true' }}
       shell: bash
       run: |
@@ -78,30 +96,7 @@ runs:
       run: |
         set -euo pipefail
         marker="<!-- workproof-summary -->"
-        body="$(node -e '
-          const r = JSON.parse(require("fs").readFileSync("workproof-report.json", "utf8"));
-          const repo = r.repositories[0];
-          const f = Object.fromEntries(repo.figures.map((x) => [x.id, x.value]));
-          const pct = (x) => (x * 100).toFixed(1) + "%";
-          const lines = [
-            "<!-- workproof-summary -->",
-            "### workproof · " + repo.identity.names.join(", "),
-            "",
-            "| figure | value |",
-            "|---|---|",
-            "| Surviving lines | " + f.survivingLines.lines.toLocaleString("en-US") + " of " + f.survivingLines.linesAttributed.toLocaleString("en-US") + ", " + pct(f.survivingLines.share) + " |",
-            "| Files authored | " + f.filesAuthored.authored + " of " + f.filesAuthored.total + " alive at HEAD, " + pct(f.filesAuthored.share) + " |",
-            "| Tenure window | " + f.tenure.first + " to " + f.tenure.last + " (" + f.tenure.days + " days) |",
-            "| Share of commits | " + f.commitShare.author + " of " + f.commitShare.total + ", " + pct(f.commitShare.share) + " |",
-            "| Cadence | " + f.cadence.activeWeeks + " active weeks of " + f.cadence.weeksInTenure + ", " + f.cadence.commitsPerActiveWeek + " commits per active week |",
-            "| Footprint | " + f.footprint.filesTouched + " files touched, " + f.footprint.ownedDirectories.length + " directories at or above the threshold |",
-            "| Test-file changes and documents | " + pct(f.testsAndDocs.testShare) + " of test-file changes, " + f.testsAndDocs.docsCreated + " documents created |",
-            "| AI-assisted commits | " + f.aiAssisted.commits + ", " + pct(f.aiAssisted.share) + " of the author's commits |",
-            "",
-            "excluded " + repo.excluded.botCommits + " bot commits and " + repo.excluded.files + " generated, vendored or lock files · HEAD `" + repo.head.slice(0, 12) + "` · report hash `" + r.hash.slice(0, 16) + "` · `npx workproof check workproof-report.json` recomputes the hash offline, `verify` recomputes the figures. Every figure has a limit; see the report.",
-          ];
-          process.stdout.write(lines.join("\n"));
-        ')"
+        body="$(node "$GITHUB_ACTION_PATH/scripts/action-comment.mjs" workproof-report.json)"
         existing="$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)"
         if [ -n "$existing" ]; then
           gh api -X PATCH "repos/$REPO/issues/comments/$existing" -f body="$body" >/dev/null

@@ -100,12 +100,58 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run build --if-present
       - run: node scripts/release-gate.mjs
+  action:
+    # The composite action, run the way a user runs it (uses: ./ on a full-history checkout),
+    # but on the package built from this commit instead of the registry version, so a change
+    # in src/ that breaks the summary, the artifact or the comment fails here before release.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # workproof refuses a shallow clone
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Pack the package built from this commit
+        id: pack
+        run: echo "tgz=$RUNNER_TEMP/$(npm pack --silent --pack-destination "$RUNNER_TEMP" | tail -1)" >> "$GITHUB_OUTPUT"
+      - uses: ./
+        id: workproof
+        with:
+          author: Efe Genc
+          package: ${{ steps.pack.outputs.tgz }}
+          comment: "false" # this job has no pull-requests write; the comment body is rendered below instead
+      - name: Download the artifact the action uploaded
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: workproof-report
+          path: ${{ runner.temp }}/artifact
+      - name: The outputs, the artifact, the summary source and the comment body all render
+        env:
+          REPORT: ${{ steps.workproof.outputs.report }}
+          ARTIFACT: ${{ runner.temp }}/artifact
+        run: |
+          set -eu
+          test "$REPORT" = workproof-report.json || { echo "outputs.report is '$REPORT'"; exit 1; }
+          for f in workproof-report.md workproof-report.json workproof-report.intoto.json workproof-report.predicate.json; do
+            test -s "$ARTIFACT/$f" || { echo "artifact is missing $f"; exit 1; }
+          done
+          node dist/src/cli.js check "$ARTIFACT/workproof-report.json"
+          grep -q '^# Engineering report' workproof-report.md || { echo "the summary source has no report heading"; exit 1; }
+          node scripts/action-comment.mjs "$REPORT" > "$RUNNER_TEMP/comment.md"
+          cat "$RUNNER_TEMP/comment.md"
+          if grep -Eq 'undefined|NaN' "$RUNNER_TEMP/comment.md"; then echo "the comment printed undefined or NaN"; exit 1; fi
+          test "$(grep -c '^| ' "$RUNNER_TEMP/comment.md")" -eq 9 || { echo "the comment table does not have its header and eight rows"; exit 1; }
   ci-ok:
     # The one check the branch ruleset requires; it fails if any job above failed or was cancelled.
     if: always()
-    needs: [test, package, release-gate, reproducibility]
+    needs: [test, package, release-gate, reproducibility, action]
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo "test: ${{ needs.test.result }}  package: ${{ needs.package.result }}  release-gate: ${{ needs.release-gate.result }}  reproducibility: ${{ needs.reproducibility.result }}"
-          test "${{ needs.test.result }}" = success && test "${{ needs.package.result }}" = success && test "${{ needs.release-gate.result }}" = success && test "${{ needs.reproducibility.result }}" = success
+          echo "test: ${{ needs.test.result }}  package: ${{ needs.package.result }}  release-gate: ${{ needs.release-gate.result }}  reproducibility: ${{ needs.reproducibility.result }}  action: ${{ needs.action.result }}"
+          test "${{ needs.test.result }}" = success && test "${{ needs.package.result }}" = success && test "${{ needs.release-gate.result }}" = success && test "${{ needs.reproducibility.result }}" = success && test "${{ needs.action.result }}" = success
