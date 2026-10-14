@@ -6,6 +6,12 @@
 // flags placed before the file list, which is why `npm test -- --experimental-test-coverage`
 // silently printed no coverage at all. Coverage counts dist/src only: the compiled code people
 // install, not the tests or the scripts.
+// The floors in package.json sit below the lowest total CI has measured, not at the usual one.
+// Five CI runs of the same commit on 2026-10-14 gave lines/branches 97.23/86.09 four times and
+// 96.73/84.16 once; the difference was entirely in dist/src/cli.js (argument-parsing branches that
+// only CLI subprocess tests reach), so a child process's coverage is sometimes not collected. The
+// cause is not found. A floor that fails one run in five teaches people to re-run red, so the
+// floors are 96/83 until that is fixed.
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
