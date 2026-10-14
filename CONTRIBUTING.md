@@ -7,7 +7,12 @@ workproof turns a private git repository into a verifiable engineering report fo
 ```
 npm ci
 npm test        # tsc build, then node:test over the compiled tests (fixture repositories built in a temp dir)
+npm run test:coverage   # the same tests under Node's built-in coverage of dist/src, with floors
 ```
+
+CI runs `test:coverage` on Linux with Node 24 and fails below the floors in that script. They were
+set from the values measured there when the job was added (97.23% lines, 85.87% branches, 94.71%
+functions), rounded down. If your change raises coverage, raise the floors with it.
 
 Node 22 or newer and git are required. Test files are named explicitly in `package.json`, and `test/suite.test.mjs` fails if a test file on disk is not named there.
 

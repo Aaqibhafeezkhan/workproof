@@ -57,6 +57,15 @@ Node 20 reached end of life on 2026-04-30 and gets no security fixes. CI no long
 matrix is 22 and 24 on Linux, plus 24 on Windows and macOS. npm warns when installing on Node 20 and
 does not refuse; nothing in the code was changed to stop it running there, but it is no longer tested.
 
+**Test coverage is measured in CI, with a floor.** `npm run test:coverage` runs the suite under
+Node's built-in coverage of `dist/src`, which includes the CLI runs the tests start as child
+processes. A new `coverage` job runs it on Linux with Node 24 and is part of `ci-ok`. Measured there:
+97.23% lines, 85.87% branches, 94.71% functions; the floors are 97, 85 and 94. On macOS the branch
+figure was 86.09%, so the floor comes from the platform CI uses. Removing the one test that calls
+`narrate` takes lines to 96.18% and fails the job. `scripts/coverage.mjs` reads the test files from
+the `test` script, because `npm test -- --experimental-test-coverage` places the flag after the file
+list, where Node ignores it and prints no coverage at all.
+
 ## 0.5.1 (2026-10-14)
 
 **The npm 12 fix had no test that could tell whether it was being exercised.** `extractPackedFiles`

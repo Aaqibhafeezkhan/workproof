@@ -146,12 +146,28 @@ jobs:
           cat "$RUNNER_TEMP/comment.md"
           if grep -Eq 'undefined|NaN' "$RUNNER_TEMP/comment.md"; then echo "the comment printed undefined or NaN"; exit 1; fi
           test "$(grep -c '^| ' "$RUNNER_TEMP/comment.md")" -eq 9 || { echo "the comment table does not have its header and eight rows"; exit 1; }
+  coverage:
+    # Line, branch and function coverage of dist/src under Node's built-in coverage, one leg. The
+    # floors in the test:coverage script are the values measured on Linux with Node 24 when this
+    # job was added (97.23% lines, 85.87% branches, 94.71% functions), rounded down; raise them
+    # when coverage rises, so a removed test shows up as a failed job.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run test:coverage
   ci-ok:
     # The one check the branch ruleset requires; it fails if any job above failed or was cancelled.
     if: always()
-    needs: [test, package, release-gate, reproducibility, action]
+    needs: [test, package, release-gate, reproducibility, action, coverage]
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo "test: ${{ needs.test.result }}  package: ${{ needs.package.result }}  release-gate: ${{ needs.release-gate.result }}  reproducibility: ${{ needs.reproducibility.result }}  action: ${{ needs.action.result }}"
-          test "${{ needs.test.result }}" = success && test "${{ needs.package.result }}" = success && test "${{ needs.release-gate.result }}" = success && test "${{ needs.reproducibility.result }}" = success && test "${{ needs.action.result }}" = success
+          echo "test: ${{ needs.test.result }}  package: ${{ needs.package.result }}  release-gate: ${{ needs.release-gate.result }}  reproducibility: ${{ needs.reproducibility.result }}  action: ${{ needs.action.result }}  coverage: ${{ needs.coverage.result }}"
+          test "${{ needs.test.result }}" = success && test "${{ needs.package.result }}" = success && test "${{ needs.release-gate.result }}" = success && test "${{ needs.reproducibility.result }}" = success && test "${{ needs.action.result }}" = success && test "${{ needs.coverage.result }}" = success
