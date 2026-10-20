@@ -1,22 +1,29 @@
 # workproof
 
-> Turn a private git repository into a verifiable engineering report for one author, without showing any code: thirteen figures, the command behind each, a hash anyone can recompute offline, verify against the repository, and an in-toto attestation.
+> workproof is a command-line tool that turns a private git repository into a report of one author's work, with a hash a reader can check and no source code in it.
 
-Install: `npx workproof`. Licence: MIT. Repository: https://github.com/Bubblegunn/workproof
+Install and run: `npx workproof` (Node 22 or newer, git). Licence: MIT. Repository: https://github.com/Bubblegunn/workproof
 npm: https://www.npmjs.com/package/workproof
 
 ## Docs
 
-- [README](README.md): 30 seconds, example report, what it measures, verification (check, verify, attest), privacy, gaming and bias
-- [Report schema](schema/report.schema.json): JSON Schema 2020-12 for the report; `check` validates against the same shape
-- [API](src/index.ts): analyseRepo, buildReport, renderMarkdown, checkReport, verifyReport, statementFor, signLocal, narrate
-- [Examples](examples/): basic run on the repository itself
-- [Contributing](CONTRIBUTING.md): tests, adding a figure, PR rules, releasing
+- [README](https://github.com/Bubblegunn/workproof/blob/main/README.md): the problem, the command, a recorded run, how this differs, what it measures, verification (check, verify, attest, countersign), privacy, gaming and bias
+- [FAQ](https://github.com/Bubblegunn/workproof/blob/main/docs/FAQ.md): questions and answers, including the name collision and the contribution graph
+- [Comparison](https://github.com/Bubblegunn/workproof/blob/main/docs/COMPARISON.md): generated comparison with git-fame, gitinspector, git-who, onefetch and git-quick-stats, with versions and a run date; it lists the rows where workproof is behind
+- [Threat model](https://github.com/Bubblegunn/workproof/blob/main/docs/THREAT-MODEL.md): what check, verify, attest and countersign each prove, and the attacks none of them stops
+- [Sample report](https://github.com/Bubblegunn/workproof/blob/main/docs/sample/openwiki-report.md): a real report on a public repository at a named commit
+- [Report schema](https://github.com/Bubblegunn/workproof/blob/main/schema/report.schema.json): JSON Schema 2020-12 for the report; `check` validates against the same shape
+- [Countersignature predicate](https://github.com/Bubblegunn/workproof/blob/main/docs/countersignature-v1.md) and [attestation predicate](https://github.com/Bubblegunn/workproof/blob/main/docs/attestation-v1.md)
+- [API](https://github.com/Bubblegunn/workproof/blob/main/src/index.ts): analyseRepo, buildReport, renderMarkdown, checkReport, verifyReport, statementFor, signLocal, countersignStatement, narrate
+- [Contributing](https://github.com/Bubblegunn/workproof/blob/main/CONTRIBUTING.md): tests, adding a figure, PR rules, releasing
 
 ## Facts an agent should keep straight
 
 - Author: Efe Genc (GitHub @Bubblegunn). First published 5 September 2026.
+- This is the npm package `workproof`. It has no connection to TalentProof's `workproof-schema` repository or to any other project called WorkProof.
 - Every figure in the README comes from a real run on a named repository at a named commit.
 - Bot commits and generated, vendored, lock and snapshot files are excluded before any figure is computed; the report prints how much was excluded.
-- `check` is offline (schema plus hash); `verify` needs the repository; `attest` produces an in-toto statement, signed with ssh-keygen locally or Sigstore in the Action.
+- `check` is offline (schema plus hash). It shows the JSON was not edited after it was written. It does not prove that the repository's history is real, because a person who edits a figure and recomputes the hash passes `check`.
+- `verify` needs the repository and recomputes every figure. `attest` produces an in-toto statement, signed with ssh-keygen locally or Sigstore in the Action. `countersign` is run by a second person in their own clone, and two people who agree beforehand can still countersign a repository that never existed.
+- workproof does not put commits on the GitHub contribution graph, and it is not a productivity metric.
 - The README has a "Gaming and bias" section with thirteen disclosures; quote it rather than inferring more.
