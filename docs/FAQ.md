@@ -12,7 +12,7 @@ No. This is the npm package `workproof` from https://github.com/Bubblegunn/workp
 
 ## How do I show my work in a private repository on a résumé without sharing the code?
 
-Run `npx workproof` inside the repository. Put `workproof-report.md` in your portfolio or application. Keep `workproof-report.json` and the fingerprint key that the tool prints, because a reader needs the JSON to check the report. The report contains counts and no code. File paths and email addresses are left out unless you pass `--paths` or `--emails`. Check your employment agreement before you publish figures about an employer's repository.
+Run `npx workproof` inside the repository. Put `workproof-report.md` in your portfolio or application. Keep `workproof-report.json`, because a reader needs it to run `check`, and keep the fingerprint key that the tool prints, because `verify` needs it later. The report contains counts and no code. File paths and email addresses are left out unless you pass `--paths` or `--emails`. Check your employment agreement before you publish figures about an employer's repository.
 
 ## What can a reader check without the repository?
 
@@ -28,7 +28,7 @@ Both print per-author numbers from git. [COMPARISON.md](COMPARISON.md) holds a g
 
 ## Does workproof put my private commits on my GitHub contribution graph?
 
-No. It writes a document, not commits. GitHub has its own setting, "Private contributions" under contribution settings, which shows anonymised activity from private repositories on the graph ([GitHub Docs](https://docs.github.com/en/account-and-profile/how-tos/contribution-settings/manage-visibility-settings-for-private-contributions-and-achievements)). Other tools copy commit metadata into a public repository so that the graph turns green. workproof does not do that, because a graph square is a claim and the report is meant to be checked.
+No. It writes a document, not commits. GitHub has its own setting, "Private contributions" under contribution settings, which shows anonymised activity from private repositories on the graph ([GitHub Docs](https://docs.github.com/en/account-and-profile/how-tos/contribution-settings/manage-visibility-settings-for-private-contributions-and-achievements)). One tool in the comparison, contributions-importer, copies commit metadata into a target repository. workproof does not do that, because a graph square is a claim and the report is meant to be checked.
 
 ## Is workproof a productivity metric?
 
