@@ -262,7 +262,7 @@ snapshot files are removed before any of them is computed (see Gaming and bias).
 
 ## How verification works
 
-Three commands, in increasing order of what the reader needs to have.
+Four commands, in increasing order of what the reader needs to have.
 
 - `workproof check report.json` needs only the file. It validates the document against
   [schema/report.schema.json](schema/report.schema.json) and recomputes the hash: sha256
@@ -299,6 +299,19 @@ differently; a test now pins all of this, and CI checks it on Linux, macOS and W
 
   where `allowed_signers` is one line, `you@example.com ssh-ed25519 AAAA...`, and the key is
   the one GitHub serves at `https://github.com/<you>.keys`.
+
+- `workproof countersign report.json --key ~/.ssh/id_ed25519 --fingerprint-key <hex>` is run by a
+  second person who worked in the same repository, in their own full clone at the commit the
+  report names. It recomputes every figure, refuses unless the fingerprint, the commit and every
+  figure match, and then signs a statement about the report in the `workproof-countersign`
+  namespace. The author sends the report and the fingerprint key (printed once when the report was
+  made); the colleague sends back one `.dsse.json` file. A reader runs
+  `workproof check report.json --countersign file.dsse.json --allowed-signers allowed_signers`.
+  This moves the claim from "issued by the person it flatters" to "recomputed by someone else".
+  It does not stop two people who agree beforehand from countersigning a repository that never
+  existed, and it says who signed only for keys the reader lists. A report with no
+  countersignature is normal. The predicate is described in
+  [docs/countersignature-v1.md](docs/countersignature-v1.md).
 
 What `verify` proves: every figure was recomputed from that repository at that moment and
 came out the same, and the document was not edited after it was written. What it does not

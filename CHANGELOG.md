@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.0 (unreleased)
+
+**A colleague can countersign a report (#19).** `workproof countersign report.json --key <ssh-key>` is run by a
+second person in their own clone of the same repository. It recomputes every figure with `verify`'s own code and
+refuses, signing nothing, unless the report checks, the keyed fingerprint matches, the clone is at the report's commit
+and every figure is equal. The signed statement binds the report hash, commit and fingerprint and carries no figures,
+paths or emails. It is signed with `ssh-keygen -Y sign` in the `workproof-countersign` namespace, so an `attest`
+signature cannot be replayed as a countersignature, and it adds no dependency. `workproof check report.json
+--countersign file.dsse.json [--allowed-signers file]` names the key, and the person when the reader's own list names
+it. A report with no countersignature prints exactly what it printed before. Two people who agree beforehand can still
+countersign a repository that never existed; the predicate page says so.
+
 ## 0.6.2 (2026-10-14)
 
 **CI runs the Action through GitHub's self-repository reference.** The `action` job now says `uses: $/` instead of

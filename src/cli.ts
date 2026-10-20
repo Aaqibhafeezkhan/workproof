@@ -3,11 +3,12 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
-import { analyseRepo, buildReport, renderMarkdown, verifyReport, checkReport, narrate, badgeFor, newFingerprintKey, writeStatement, signLocal } from "./index.js";
-import type { Params, Report, RepoReport } from "./index.js";
+import { analyseRepo, buildReport, renderMarkdown, verifyReport, checkReport, narrate, badgeFor, newFingerprintKey, writeStatement, signLocal, countersignStatement, signCountersignature, readCountersignature, COUNTERSIGN_PROVES, COUNTERSIGN_DOES_NOT_PROVE } from "./index.js";
+import type { Params, Report, RepoReport, CountersignatureReading } from "./index.js";
 
 const HELP = `usage: workproof [options] [--repo <dir>]...
-       workproof check <report.json>
+       workproof check <report.json> [--countersign <file.dsse.json>]... [--allowed-signers <file>]
+       workproof countersign <report.json> --key <ssh-key> [--repo <dir>] [--fingerprint-key <hex>] [--as <label>]
        workproof verify <report.json> [--repo <dir>]... [--fingerprint-key <hex>]
        workproof attest <report.json> [--local <ssh-key>]
 
@@ -38,11 +39,14 @@ Turn a git repository into a verifiable engineering report for one author, witho
 check validates the document and recomputes its hash offline; verify does that, then
 compares the fingerprint and HEAD and recomputes every figure in the repository; attest
 writes an in-toto statement whose subject is the report hash, and with --local signs it
-with ssh-keygen -Y sign (namespace workproof) into a DSSE envelope.`;
+with ssh-keygen -Y sign (namespace workproof) into a DSSE envelope. countersign is run by a second
+person in their own clone of the same repository: it recomputes every figure, refuses unless they
+all match, and signs a statement about the report with --key (namespace workproof-countersign);
+check --countersign reads that file and says who signed and what that does and does not prove.`;
 
 type OutputFormat = "both" | "markdown" | "json";
 
-interface Cli { params: Params; repos: string[]; out: string; format: OutputFormat; json: boolean; doNarrate: boolean; badge: boolean; verifyFile: string | undefined; checkFile: string | undefined; attestFile: string | undefined; localKey: string | undefined }
+interface Cli { params: Params; repos: string[]; out: string; format: OutputFormat; json: boolean; doNarrate: boolean; badge: boolean; verifyFile: string | undefined; checkFile: string | undefined; attestFile: string | undefined; localKey: string | undefined; countersignFile: string | undefined; signKey: string | undefined; signLabel: string | undefined; countersigns: string[]; allowedSigners: string | undefined }
 
 export function parse(argv: string[]): Cli {
   const params: Params = { depth: 2, threshold: 0.5, minCommits: 5, paths: false, emails: false, exclusions: true, exclude: [], seed: "", copies: false };
@@ -57,6 +61,11 @@ export function parse(argv: string[]): Cli {
   let checkFile: string | undefined;
   let attestFile: string | undefined;
   let localKey: string | undefined;
+  let countersignFile: string | undefined;
+  let signKey: string | undefined;
+  let signLabel: string | undefined;
+  const countersigns: string[] = [];
+  let allowedSigners: string | undefined;
   if (argv[0] === "attest") {
     attestFile = argv[1];
     if (!attestFile) throw new Error("attest needs a report.json");
@@ -71,8 +80,24 @@ export function parse(argv: string[]): Cli {
   if (argv[0] === "check") {
     checkFile = argv[1];
     if (!checkFile) throw new Error("check needs a report.json");
-    if (argv.length > 2) throw new Error("check takes only the report; it never reads a repository");
+    const rest = argv.slice(2);
+    for (let i = 0; i < rest.length; i++) {
+      const a = rest[i]!;
+      const value = () => {
+        const v = rest[++i];
+        if (v === undefined) throw new Error(`${a} needs a value`);
+        return v;
+      };
+      if (a === "--countersign") countersigns.push(value());
+      else if (a === "--allowed-signers") allowedSigners = value();
+      else throw new Error("check takes only the report, --countersign and --allowed-signers; it never reads a repository");
+    }
     argv = [];
+  }
+  if (argv[0] === "countersign") {
+    countersignFile = argv[1];
+    if (!countersignFile) throw new Error("countersign needs a report.json");
+    argv = argv.slice(2);
   }
   if (argv[0] === "verify") {
     verifyFile = argv[1];
@@ -101,6 +126,8 @@ export function parse(argv: string[]): Cli {
     else if (a === "--fingerprint-key") params.fingerprintKey = next();
     else if (a === "--paths") params.paths = true;
     else if (a === "--emails") params.emails = true;
+    else if (a === "--key") signKey = next();
+    else if (a === "--as") signLabel = next();
     else if (a === "--narrate") doNarrate = true;
     else if (a === "--badge") badge = true;
     else if (a === "--out") out = next();
@@ -115,9 +142,11 @@ export function parse(argv: string[]): Cli {
       process.exit(0);
     } else throw new Error(`unknown option ${a} (see --help)`);
   }
+  if ((signKey !== undefined || signLabel !== undefined) && !countersignFile) throw new Error("--key and --as belong to countersign");
+  if (countersignFile && !signKey) throw new Error("countersign needs --key <ssh private key>");
   if (authors.length) params.author = authors;
   if (!repos.length) repos.push(process.cwd());
-  return { params, repos, out, format, json, doNarrate, badge, verifyFile, checkFile, attestFile, localKey };
+  return { params, repos, out, format, json, doNarrate, badge, verifyFile, checkFile, attestFile, localKey, countersignFile, signKey, signLabel, countersigns, allowedSigners };
 }
 
 async function main() {
@@ -126,7 +155,7 @@ async function main() {
     return;
   }
   const started = Date.now();
-  const { params, repos, out, format, json, doNarrate, badge, verifyFile, checkFile, attestFile, localKey } = parse(process.argv.slice(2));
+  const { params, repos, out, format, json, doNarrate, badge, verifyFile, checkFile, attestFile, localKey, countersignFile, signKey, signLabel, countersigns, allowedSigners } = parse(process.argv.slice(2));
   const progress = (m: string) => process.stderr.write(`${m}\n`);
   const printIntegrity = (i: ReturnType<typeof checkReport>) => {
     const schemaProblems = i.problems.filter((p) => !p.startsWith("hash mismatch"));
@@ -134,6 +163,31 @@ async function main() {
     for (const p of schemaProblems) console.log(`  ${p}`);
     if (!schemaProblems.length) console.log(i.ok ? `hash ok ${i.hash.computed}` : i.problems.find((p) => p.startsWith("hash mismatch"))!);
   };
+  const printCountersignature = (r: CountersignatureReading, listed: boolean) => {
+    console.log(`countersignature ${r.file}`);
+    if (r.keyFingerprint) {
+      const trust = r.principal ? `, listed in your allowed signers as ${r.principal}` : listed ? "" : ", not checked against any list of keys you trust (pass --allowed-signers)";
+      console.log(`  signed with a ${r.keyType ?? "unknown type of"} key ${r.keyFingerprint}${trust}`);
+    }
+    if (r.label !== undefined) console.log(`  the signer's own label, not verified: ${JSON.stringify(r.label)}`);
+    if (r.countersignedAt !== undefined) console.log(`  countersigned at ${r.countersignedAt}`);
+    console.log(r.ok ? "  signature valid and bound to this report" : "  NOT VALID");
+    for (const p of r.problems) console.log(`  ${p}`);
+  };
+  if (countersignFile) {
+    const report = JSON.parse(await readFile(countersignFile, "utf8")) as Report;
+    const toolVersion = createRequire(import.meta.url)("../../package.json").version as string;
+    const statement = await countersignStatement(report, repos, {
+      toolVersion,
+      ...(params.fingerprintKey ? { fingerprintKey: params.fingerprintKey } : {}),
+      ...(signLabel ? { label: signLabel } : {}),
+    });
+    const written = await signCountersignature(statement, countersignFile, signKey!);
+    console.log(`wrote ${written.statement}, ${written.signature} and ${written.envelope}`);
+    console.log(`Send back only the .dsse.json file: ${written.envelope}`);
+    console.log(`\n${COUNTERSIGN_PROVES}\n${COUNTERSIGN_DOES_NOT_PROVE}`);
+    return;
+  }
   if (attestFile) {
     const { statement, predicate } = await writeStatement(attestFile);
     const files = [statement, predicate];
@@ -145,9 +199,23 @@ async function main() {
     return;
   }
   if (checkFile) {
-    const result = checkReport(JSON.parse(await readFile(checkFile, "utf8")));
+    const checked = JSON.parse(await readFile(checkFile, "utf8")) as Report;
+    const result = checkReport(checked);
     printIntegrity(result);
-    process.exit(result.ok ? 0 : 1);
+    let failed = !result.ok;
+    if (countersigns.length) {
+      if (!result.ok) {
+        console.log("countersignatures were not read: the report itself does not check");
+      } else {
+        for (const file of countersigns) {
+          const reading = await readCountersignature(file, checked, allowedSigners === undefined ? {} : { allowedSigners });
+          printCountersignature(reading, allowedSigners !== undefined);
+          if (!reading.ok) failed = true;
+        }
+        console.log(`\n${COUNTERSIGN_PROVES}\n${COUNTERSIGN_DOES_NOT_PROVE}`);
+      }
+    }
+    process.exit(failed ? 1 : 0);
   }
   if (verifyFile) {
     const report = JSON.parse(await readFile(verifyFile, "utf8")) as Report;

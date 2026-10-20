@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile, readFile, copyFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { makeRepo, makeTzRepo } from "./fixture.js";
 import { analyseRepo, buildReport, checkReport, hashOf } from "../src/index.js";
@@ -228,4 +228,99 @@ test("a countersignature reads back as valid, and fails when it is moved, edited
     await rm(dir, { recursive: true, force: true });
     await rm(base, { recursive: true, force: true });
   }
+});
+
+
+const cli = join(process.cwd(), "dist/src/cli.js");
+
+test("the CLI countersigns in one command, check reports it, and check without one prints exactly what it printed before", async () => {
+  const dir = await makeRepo();
+  const { clone, base } = await cloneOf(dir);
+  try {
+    const report = await reportOf(dir);
+    const reportPath = join(base, "r.json");
+    await writeFile(reportPath, JSON.stringify(report));
+    keygen(join(base, "key"), "cem");
+    const pub = await readFile(join(base, "key.pub"), "utf8");
+
+    const plain = execFileSync("node", [cli, "check", reportPath], { encoding: "utf8" });
+    assert.equal(plain, `schema ok\nhash ok ${report.hash}\n`, "a report with no countersignature prints what it always did");
+
+    const signed = spawnSync("node", [cli, "countersign", reportPath, "--key", join(base, "key"), "--repo", clone, "--fingerprint-key", KEY, "--as", "Cem"], { encoding: "utf8" });
+    assert.equal(signed.status, 0, signed.stderr);
+    assert.match(signed.stdout, /wrote \S+\.intoto\.json, \S+\.sig and \S+\.dsse\.json/);
+    assert.match(signed.stdout, /send back only the \.dsse\.json file/i);
+    assert.match(signed.stdout, /What a countersignature proves/);
+    const envelope = /(\S+\.dsse\.json)/.exec(signed.stdout)![1]!;
+
+    const checked = spawnSync("node", [cli, "check", reportPath, "--countersign", envelope], { encoding: "utf8" });
+    assert.equal(checked.status, 0, checked.stdout + checked.stderr);
+    assert.match(checked.stdout, /^schema ok\nhash ok /);
+    assert.match(checked.stdout, /signature valid and bound to this report/);
+    assert.match(checked.stdout, /signer's own label, not verified: "Cem"/);
+    assert.match(checked.stdout, /not checked against any list of keys you trust/);
+    assert.match(checked.stdout, /What it does not prove[\s\S]*agree beforehand/);
+
+    await writeFile(join(base, "allowed"), `cem@example.com ${pub}`);
+    const named = spawnSync("node", [cli, "check", reportPath, "--countersign", envelope, "--allowed-signers", join(base, "allowed")], { encoding: "utf8" });
+    assert.equal(named.status, 0, named.stdout + named.stderr);
+    assert.match(named.stdout, /listed in your allowed signers as cem@example\.com/);
+
+    // A tampered envelope fails check and the exit code says so.
+    const env = JSON.parse(await readFile(envelope, "utf8"));
+    const statement = JSON.parse(Buffer.from(env.payload, "base64").toString("utf8"));
+    statement.predicate.countersignedAt = "2020-01-01T00:00:00Z";
+    await writeFile(join(base, "tampered.dsse.json"), JSON.stringify({ ...env, payload: Buffer.from(JSON.stringify(statement, null, 2) + "\n").toString("base64") }));
+    const bad = spawnSync("node", [cli, "check", reportPath, "--countersign", join(base, "tampered.dsse.json")], { encoding: "utf8" });
+    assert.equal(bad.status, 1);
+    assert.match(bad.stdout, /NOT VALID/);
+
+    // An edited report is stopped before any countersignature is read.
+    const edited = JSON.parse(JSON.stringify(report));
+    edited.repositories[0].figures[0].value = { forged: true };
+    await writeFile(join(base, "edited.json"), JSON.stringify(edited));
+    const stopped = spawnSync("node", [cli, "check", join(base, "edited.json"), "--countersign", envelope], { encoding: "utf8" });
+    assert.equal(stopped.status, 1);
+    assert.match(stopped.stdout, /countersignatures were not read/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+    await rm(base, { recursive: true, force: true });
+  }
+});
+
+test("countersign names what is missing or wrong instead of failing silently", async () => {
+  const dir = await makeRepo();
+  const { clone, base } = await cloneOf(dir);
+  try {
+    const report = await reportOf(dir);
+    const reportPath = join(base, "r.json");
+    await writeFile(reportPath, JSON.stringify(report));
+    const noKey = spawnSync("node", [cli, "countersign", reportPath], { encoding: "utf8" });
+    assert.equal(noKey.status, 1);
+    assert.match(noKey.stderr, /countersign needs --key/);
+    keygen(join(base, "key"), "cem");
+    const noFingerprintKey = spawnSync("node", [cli, "countersign", reportPath, "--key", join(base, "key"), "--repo", clone], { encoding: "utf8" });
+    assert.equal(noFingerprintKey.status, 1);
+    assert.match(noFingerprintKey.stderr, /--fingerprint-key/);
+    const stray = spawnSync("node", [cli, "--key", join(base, "key")], { encoding: "utf8" });
+    assert.equal(stray.status, 1);
+    assert.match(stray.stderr, /--key and --as belong to countersign/);
+    const repoOnCheck = spawnSync("node", [cli, "check", reportPath, "--repo", clone], { encoding: "utf8" });
+    assert.equal(repoOnCheck.status, 1);
+    assert.match(repoOnCheck.stderr, /never reads a repository/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+    await rm(base, { recursive: true, force: true });
+  }
+});
+
+test("the countersignature predicate type resolves to a page in this repository that describes it", async () => {
+  const owned = /^https:\/\/github\.com\/Bubblegunn\/workproof\/blob\/main\//;
+  assert.match(COUNTERSIGN_PREDICATE_TYPE, owned);
+  const doc = COUNTERSIGN_PREDICATE_TYPE.replace(owned, "");
+  const text = await readFile(join(process.cwd(), doc), "utf8");
+  assert.match(text, /predicateType/);
+  assert.ok(text.includes(COUNTERSIGN_PREDICATE_TYPE));
+  assert.ok(text.includes("workproof-countersign"));
+  assert.ok(!text.includes("\u2014"), "no em dash");
 });
