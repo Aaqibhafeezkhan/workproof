@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.0 (unreleased)
+## 0.7.0 (2026-10-20)
 
 **Privacy fix: other people's names and logins no longer reach the report without `--emails`.** The "may be the same
 person" record used to write the commit names of the other addresses, and reasons that quoted a GitHub login or an
