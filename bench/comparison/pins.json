@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "note": "Versions, commits and checksums of the tools workproof is compared with. Nothing here is copied into this repository: the tools are fetched into the gitignored _upstream/ directory and run. policy run-only means the code may be run and its output read as data, never copied.",
+  "tools": {
+    "git-fame": {
+      "kind": "pip",
+      "package": "git-fame",
+      "version": "4.2.1",
+      "repo": "casperdcl/git-fame",
+      "licence": "MPL-2.0",
+      "policy": "run-only",
+      "bin": "venv/bin/git-fame",
+      "licenceGlob": "git_fame-4.2.1.dist-info/licenses/LICENCE"
+    },
+    "gitinspector": {
+      "kind": "git",
+      "repo": "ejwa/gitinspector",
+      "version": "v0.5.1",
+      "commit": "99e86c439b2b208b683e1eec0b7528e0c29cadd0",
+      "licence": "GPL-3.0",
+      "policy": "run-only",
+      "bin": "gitinspector/gitinspector.py",
+      "licencePath": "LICENSE.txt"
+    },
+    "git-quick-stats": {
+      "kind": "git",
+      "repo": "git-quick-stats/git-quick-stats",
+      "version": "2.11.0",
+      "commit": "0f9481a507120ca2ef58c0559f78a007db2291a2",
+      "licence": "MIT",
+      "policy": "adapt-ok",
+      "bin": "git-quick-stats/git-quick-stats",
+      "licencePath": "LICENSE"
+    },
+    "contributions-importer": {
+      "kind": "git",
+      "repo": "miromannino/Contributions-Importer-For-Github",
+      "version": "2.0.2",
+      "commit": "95e6a12c3a2764e582cf10d324637ba1b20624f3",
+      "licence": "MIT",
+      "policy": "adapt-ok",
+      "bin": null,
+      "licencePath": "LICENSE",
+      "note": "Fetched for its licence and README only. It writes commits into a target repository and needs a GitHub token, so it is never executed."
+    },
+    "git-who": {
+      "kind": "release",
+      "repo": "sinclairtarget/git-who",
+      "version": "v1.3",
+      "licence": "MIT",
+      "policy": "adapt-ok",
+      "licenceUrl": "https://raw.githubusercontent.com/sinclairtarget/git-who/v1.3/LICENSE",
+      "assets": {
+        "darwin_arm64": {
+          "url": "https://github.com/sinclairtarget/git-who/releases/download/v1.3/gitwho_v1.3_darwin_arm64.tar.gz",
+          "sha256": "ad8625e4de557a29eeba8c7912eb12255e627307586ae247552a363d63e9b6cb",
+          "binary": "git-who/darwin_arm64/git-who"
+        },
+        "linux_amd64": {
+          "url": "https://github.com/sinclairtarget/git-who/releases/download/v1.3/gitwho_v1.3_linux_amd64.tar.gz",
+          "sha256": "f031ea951f837d1a67c906e3a672c6afe09c4314fa5bf7e63a00b86749f86b72",
+          "binary": "git-who/linux_amd64/git-who"
+        }
+      }
+    },
+    "onefetch": {
+      "kind": "release",
+      "repo": "o2sh/onefetch",
+      "version": "3.1.0",
+      "licence": "MIT",
+      "policy": "adapt-ok",
+      "licenceUrl": "https://raw.githubusercontent.com/o2sh/onefetch/3.1.0/LICENSE.md",
+      "assets": {
+        "darwin_arm64": {
+          "url": "https://github.com/o2sh/onefetch/releases/download/3.1.0/onefetch-mac.tar.gz",
+          "sha256": "57d058910c83cd9d791464b1082a4232f4ce6530ad3dd6756033ad05dc1f8022",
+          "binary": "onefetch/onefetch"
+        },
+        "linux_amd64": {
+          "url": "https://github.com/o2sh/onefetch/releases/download/3.1.0/onefetch-linux.tar.gz",
+          "sha256": "db1963759d11f3acc1b30f112d407c97a3c17ec63675cc2a3587f4c5de0f2794",
+          "binary": "onefetch/onefetch"
+        }
+      }
+    }
+  }
+}
