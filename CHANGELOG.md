@@ -19,6 +19,10 @@ and the tool version are outside the hash, and `verify` without a fingerprint ke
 identity. It also records two places where the report writes more than the README says, and that the Sigstore step signs the report file, not the in-toto statement. A test checks that every file the page cites exists, that each
 command section carries both labels, and that the limits still hold in the code.
 
+**A Homebrew formula is prepared.** `scripts/homebrew-formula.mjs` renders the formula for one published version from the
+npm tarball and its sha256, and `packaging/homebrew/workproof.rb` is the result for 0.6.2, ready for a tap repository
+that does not exist yet. Nothing is installable through Homebrew until that tap is created.
+
 ## 0.6.2 (2026-10-14)
 
 **CI runs the Action through GitHub's self-repository reference.** The `action` job now says `uses: $/` instead of
