@@ -3,7 +3,7 @@ openwiki: reading history...
 openwiki: 369 commits read
 openwiki: blaming files (1 in 5 sample)...
 openwiki: blamed 123 of 547 files
-wrote workproof-report.md and workproof-report.json in 1.0s
+wrote workproof-report.md and workproof-report.json in 0.9s
 
 $ npx workproof check workproof-report.json
 schema ok

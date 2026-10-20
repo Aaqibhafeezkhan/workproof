@@ -1,8 +1,8 @@
 {
   "tool": "workproof",
   "schemaVersion": 2,
-  "version": "0.6.2",
-  "generatedAt": "2026-10-20T21:52:07.568Z",
+  "version": "0.7.0",
+  "generatedAt": "2026-10-20T23:16:56.442Z",
   "params": {
     "depth": 2,
     "threshold": 0.5,
