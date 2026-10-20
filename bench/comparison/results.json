@@ -1,0 +1,510 @@
+{
+  "schema": 1,
+  "runDate": "2026-10-20",
+  "machine": {
+    "os": "darwin",
+    "arch": "arm64",
+    "node": "v24.13.0",
+    "git": "2.50.1 (Apple Git-155)"
+  },
+  "tools": {
+    "git-fame": {
+      "version": "4.2.1",
+      "licence": "MPL-2.0",
+      "policy": "run-only"
+    },
+    "gitinspector": {
+      "version": "v0.5.1",
+      "licence": "GPL-3.0",
+      "policy": "run-only"
+    },
+    "git-quick-stats": {
+      "version": "2.11.0",
+      "licence": "MIT",
+      "policy": "adapt-ok"
+    },
+    "contributions-importer": {
+      "version": "2.0.2",
+      "licence": "MIT",
+      "policy": "adapt-ok"
+    },
+    "git-who": {
+      "version": "v1.3",
+      "licence": "MIT",
+      "policy": "adapt-ok"
+    },
+    "onefetch": {
+      "version": "3.1.0",
+      "licence": "MIT",
+      "policy": "adapt-ok"
+    }
+  },
+  "fixtures": {
+    "A": {
+      "description": "the deterministic test fixture: two people, a bot, a generated file, a reformat commit in .git-blame-ignore-revs"
+    },
+    "B": {
+      "url": "https://github.com/Bubblegunn/workproof.git",
+      "sha": "cd47e6e621f1ea6d7a39bfcd2a16fc0fedc0895e"
+    }
+  },
+  "truth": {
+    "author": "Ada",
+    "lines": 16,
+    "total": 31
+  },
+  "rows": [
+    {
+      "id": "survivingLines",
+      "title": "One author's surviving lines equal what git blame says (honouring .git-blame-ignore-revs)",
+      "kind": "check",
+      "ours": {
+        "default": {
+          "pass": true,
+          "shown": "16 lines (git blame: 16)"
+        },
+        "tuned": {
+          "pass": true,
+          "shown": "16 lines (git blame: 16)"
+        }
+      },
+      "tools": {
+        "git-fame": {
+          "default": {
+            "pass": false,
+            "shown": "10 lines (git blame: 16)"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "16 lines (git blame: 16)"
+          },
+          "verdict": "tie"
+        },
+        "gitinspector": {
+          "default": {
+            "pass": false,
+            "shown": "7 lines (git blame: 16)"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "7 lines (git blame: 16)"
+          },
+          "verdict": "ours ahead"
+        }
+      }
+    },
+    {
+      "id": "generatedExcluded",
+      "title": "Lock files and files marked linguist-generated add no lines to anyone",
+      "kind": "check",
+      "ours": {
+        "default": {
+          "pass": true,
+          "shown": "31 lines in total (expected 31)"
+        },
+        "tuned": {
+          "pass": true,
+          "shown": "31 lines in total (expected 31)"
+        }
+      },
+      "tools": {
+        "git-fame": {
+          "default": {
+            "pass": false,
+            "shown": "59 lines in total (expected 31)"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "31 lines in total (expected 31)"
+          },
+          "verdict": "tie"
+        },
+        "gitinspector": {
+          "default": {
+            "pass": false,
+            "shown": "31 lines in total (expected 31); a coincidence: the generated or lock-file lines are counted in this run"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "23 lines in total (expected 31)"
+          },
+          "verdict": "ours ahead"
+        }
+      }
+    },
+    {
+      "id": "botsNotAnAuthor",
+      "title": "A bot is not listed as an author",
+      "kind": "check",
+      "ours": {
+        "default": {
+          "pass": true,
+          "shown": "1 bot commits removed before counting"
+        },
+        "tuned": {
+          "pass": true,
+          "shown": "1 bot commits removed before counting"
+        }
+      },
+      "tools": {
+        "git-fame": {
+          "default": {
+            "pass": false,
+            "shown": "a bot appears in the output"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "a bot appears in the output"
+          },
+          "verdict": "ours ahead"
+        },
+        "gitinspector": {
+          "default": {
+            "pass": true,
+            "shown": "no bot in the output"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "no bot in the output"
+          },
+          "verdict": "tie"
+        },
+        "git-who": {
+          "default": {
+            "pass": false,
+            "shown": "a bot appears in the output"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "no bot in the output"
+          },
+          "verdict": "tie"
+        },
+        "git-quick-stats": {
+          "default": {
+            "pass": null,
+            "shown": "n/a: GNU date is not installed on this machine"
+          },
+          "tuned": {
+            "pass": null,
+            "shown": "n/a: GNU date is not installed on this machine"
+          },
+          "verdict": "not comparable"
+        }
+      }
+    },
+    {
+      "id": "privateByDefault",
+      "title": "The default output contains no email address",
+      "kind": "check",
+      "ours": {
+        "default": {
+          "pass": true,
+          "shown": "no email address printed"
+        },
+        "tuned": {
+          "pass": true,
+          "shown": "no email address printed"
+        }
+      },
+      "tools": {
+        "git-fame": {
+          "default": {
+            "pass": true,
+            "shown": "no email address printed"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "no email address printed"
+          },
+          "verdict": "tie"
+        },
+        "gitinspector": {
+          "default": {
+            "pass": false,
+            "shown": "an email address is printed"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "an email address is printed"
+          },
+          "verdict": "ours ahead"
+        },
+        "git-who": {
+          "default": {
+            "pass": true,
+            "shown": "no email address printed"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "no email address printed"
+          },
+          "verdict": "tie"
+        },
+        "onefetch": {
+          "default": {
+            "pass": false,
+            "shown": "an email address is printed"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "an email address is printed"
+          },
+          "verdict": "ours ahead"
+        },
+        "git-quick-stats": {
+          "default": {
+            "pass": null,
+            "shown": "n/a: GNU date is not installed on this machine"
+          },
+          "tuned": {
+            "pass": null,
+            "shown": "n/a: GNU date is not installed on this machine"
+          },
+          "verdict": "not comparable"
+        }
+      }
+    },
+    {
+      "id": "hasVerify",
+      "title": "The tool can check a report it wrote earlier (a verify or attest command)",
+      "kind": "check",
+      "ours": {
+        "default": {
+          "pass": true,
+          "shown": "help mentions verify or attest"
+        },
+        "tuned": {
+          "pass": true,
+          "shown": "help mentions verify or attest"
+        }
+      },
+      "tools": {
+        "git-fame": {
+          "default": {
+            "pass": false,
+            "shown": "no verify or attest in the help"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "no verify or attest in the help"
+          },
+          "verdict": "ours ahead"
+        },
+        "gitinspector": {
+          "default": {
+            "pass": false,
+            "shown": "no verify or attest in the help"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "no verify or attest in the help"
+          },
+          "verdict": "ours ahead"
+        },
+        "git-who": {
+          "default": {
+            "pass": false,
+            "shown": "no verify or attest in the help"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "no verify or attest in the help"
+          },
+          "verdict": "ours ahead"
+        },
+        "onefetch": {
+          "default": {
+            "pass": false,
+            "shown": "no verify or attest in the help"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "no verify or attest in the help"
+          },
+          "verdict": "ours ahead"
+        },
+        "git-quick-stats": {
+          "default": {
+            "pass": null,
+            "shown": "n/a: no help text could be read"
+          },
+          "tuned": {
+            "pass": null,
+            "shown": "n/a: no help text could be read"
+          },
+          "verdict": "not comparable"
+        }
+      }
+    },
+    {
+      "id": "gitSubcommand",
+      "title": "Runs as a git subcommand (git <name>)",
+      "kind": "check",
+      "ours": {
+        "default": {
+          "pass": false,
+          "shown": "executables: workproof"
+        },
+        "tuned": {
+          "pass": false,
+          "shown": "executables: workproof"
+        }
+      },
+      "tools": {
+        "git-fame": {
+          "default": {
+            "pass": true,
+            "shown": "executables: git-fame"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "executables: git-fame"
+          },
+          "verdict": "ours behind"
+        },
+        "git-who": {
+          "default": {
+            "pass": true,
+            "shown": "executables: git-who"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "executables: git-who"
+          },
+          "verdict": "ours behind"
+        },
+        "git-quick-stats": {
+          "default": {
+            "pass": true,
+            "shown": "executables: git-quick-stats"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "executables: git-quick-stats"
+          },
+          "verdict": "ours behind"
+        }
+      }
+    },
+    {
+      "id": "spreadsheetOrWebFormats",
+      "title": "Writes CSV, HTML or XML besides JSON",
+      "kind": "check",
+      "ours": {
+        "default": {
+          "pass": false,
+          "shown": "none of csv, html, xml"
+        },
+        "tuned": {
+          "pass": false,
+          "shown": "none of csv, html, xml"
+        }
+      },
+      "tools": {
+        "git-fame": {
+          "default": {
+            "pass": true,
+            "shown": "csv, html"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "csv, html"
+          },
+          "verdict": "ours behind"
+        },
+        "gitinspector": {
+          "default": {
+            "pass": true,
+            "shown": "html, xml"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "html, xml"
+          },
+          "verdict": "ours behind"
+        },
+        "git-who": {
+          "default": {
+            "pass": true,
+            "shown": "csv"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "csv"
+          },
+          "verdict": "ours behind"
+        },
+        "onefetch": {
+          "default": {
+            "pass": false,
+            "shown": "none of csv, html, xml"
+          },
+          "tuned": {
+            "pass": false,
+            "shown": "none of csv, html, xml"
+          },
+          "verdict": "neither"
+        }
+      }
+    },
+    {
+      "id": "timeOnRealRepo",
+      "title": "Wall-clock time on a real history (median of three runs, fixture B)",
+      "kind": "timing",
+      "ours": {
+        "ms": 521
+      },
+      "tools": {
+        "git-fame": {
+          "ms": 364,
+          "verdict": "ours behind"
+        },
+        "gitinspector": {
+          "ms": 478,
+          "verdict": "tie"
+        },
+        "git-who": {
+          "ms": 53,
+          "verdict": "ours behind"
+        },
+        "onefetch": {
+          "ms": 61,
+          "verdict": "ours behind"
+        },
+        "git-quick-stats": {
+          "ms": null,
+          "verdict": "not comparable"
+        }
+      }
+    },
+    {
+      "id": "contributionGraph",
+      "title": "Puts private work on the GitHub contribution graph",
+      "kind": "static",
+      "ours": {
+        "default": {
+          "pass": false,
+          "shown": "no, by design: workproof writes a document a reader can check, not commits (README: a badge is a claim, not evidence)"
+        },
+        "tuned": {
+          "pass": false,
+          "shown": "no, by design: workproof writes a document a reader can check, not commits (README: a badge is a claim, not evidence)"
+        }
+      },
+      "tools": {
+        "contributions-importer": {
+          "default": {
+            "pass": true,
+            "shown": "yes: copies commit metadata into a target repository (not run here: it needs a GitHub token and writes commits)"
+          },
+          "tuned": {
+            "pass": true,
+            "shown": "yes: copies commit metadata into a target repository (not run here: it needs a GitHub token and writes commits)"
+          },
+          "verdict": "ours behind"
+        }
+      }
+    }
+  ]
+}
