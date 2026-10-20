@@ -11,11 +11,14 @@ const flat = (s) => s.replace(/\s+/g, " ");
 test("the README usage block lists every command that --help lists", () => {
   const help = spawnSync(process.execPath, [join(root, "dist/src/cli.js"), "--help"], { encoding: "utf8" });
   assert.equal(help.status, 0);
-  const usage = help.stdout.split("\n").slice(0, 5).map((l) => l.replace(/^usage: /, "").trim());
-  assert.equal(usage.length, 5);
-  assert.ok(usage.every((l) => l.startsWith("workproof")), usage.join("\n"));
+  const firstBlock = help.stdout.split(/\n\s*\n/)[0].split("\n");
+  const usage = firstBlock.map((l) => l.replace(/^usage: /, "").trim()).filter((l) => l.startsWith("workproof"));
+  assert.ok(usage.length >= 5, usage.join("\n"));
   const readme = read("README.md");
-  for (const line of usage) assert.ok(readme.includes(line), `README Options block lacks: ${line}`);
+  const options = readme.slice(readme.indexOf("## Options"));
+  const open = options.indexOf("```\n");
+  const block = options.slice(open + 4, options.indexOf("```", open + 4));
+  for (const line of usage) assert.ok(block.includes(line), `README Options block lacks: ${line}`);
 });
 
 test("the README says what the Action signs, in line with action.yml", () => {

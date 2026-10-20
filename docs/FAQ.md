@@ -36,7 +36,7 @@ No. It measures what survived in the code and what was touched. It does not meas
 
 ## Does workproof send my code anywhere?
 
-No code content is read. The tool reads `git log --numstat` and `git blame` and writes counts. The only option that calls a network endpoint is `--narrate`, which is off by default; it sends the figures, and only the figures, to an endpoint you configure.
+The report contains no code. The tool reads `git log --numstat` and `git blame` and writes counts. The only option that calls a network endpoint is `--narrate`, which is off by default; it sends the figures, and only the figures, to an endpoint you configure.
 
 ## What does workproof need?
 
@@ -44,7 +44,7 @@ Node 22 or newer and git. The repository must be a full clone: on a shallow clon
 
 ## Which figures does the report contain?
 
-Thirteen: tenure window, share of commits in tenure, cadence, footprint, test-file changes and documents created, files authored, major-contributor components, commit size, co-authored commits, absence factor, AI-assisted commits, surviving lines at HEAD, and survival by cohort. The README table "What it measures" states what each one cannot show.
+Thirteen: tenure window, share of commits, cadence, footprint, test-file changes and documents created, files authored, major-contributor components, commit size, co-authored commits, absence factor, AI-assisted commits, surviving lines, and survival by cohort. The README table "What it measures" states what each one cannot show.
 
 ## How do I add workproof to GitHub Actions?
 

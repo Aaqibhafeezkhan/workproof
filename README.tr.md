@@ -68,9 +68,9 @@ all figures reproduce
 
 ## Bir rapor neye benzer
 
-openwiki deposunun `1e6d54c` sürümünde bir bakımcı için 6 Eylül 2026'da
+openwiki deposunun `1e6d54c` sürümünde bir bakımcı için 20 Ekim 2026'da
 `--author "Colin Francis" --sample 5` ile alınan gerçek çıktı; yollar ve e-postalar gizli
-(varsayılanlar). Tam raporda her figürün altında git komutuyla `How:` ve
+(varsayılanlar). Blok `docs/sample/openwiki-report.md` dosyasından alınmıştır. Tam raporda her figürün altında git komutuyla `How:` ve
 `What this cannot show:` satırları da vardır; burada yer için kesildi.
 
 ```

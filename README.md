@@ -66,8 +66,9 @@ all figures reproduce
 
 ## What a report looks like
 
-Real output for one maintainer of openwiki at `1e6d54c`, run on 6 September 2026 with
-`--author "Colin Francis" --sample 5`, paths and emails hidden (the defaults). Under every
+Real output for one maintainer of openwiki at `1e6d54c`, run on 20 October 2026 with
+`--author "Colin Francis" --sample 5`, paths and emails hidden (the defaults). The block is
+from `docs/sample/openwiki-report.md`. Under every
 figure the full report also prints `How:` with the git command and `What this cannot show:`;
 they are cut here for length.
 

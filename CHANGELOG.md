@@ -41,8 +41,8 @@ first step instead of skipping silently. The script that builds the notes is tes
 words, followed by one sentence that says what the tool is, the install command, a 28-second terminal recording on a
 public repository (`docs/demo.gif`, made by `scripts/record-demo.sh` from `docs/demo.tape`) and a short "How this
 differs" that claims only the rows `docs/COMPARISON.md` lists as ahead or tie. The stars and downloads badges are gone
-from both READMEs. The formatter, two-people and non-ASCII sections moved below the install, report, measures and
-verification sections.
+from both READMEs. The formatter, two-people and non-ASCII sections moved below the options, badge and GitHub Action
+sections.
 
 **A generated comparison with git-fame, gitinspector, git-who, onefetch and git-quick-stats (`docs/COMPARISON.md`).**
 `bench/comparison/` runs each tool and workproof on the same fixture, once with defaults and once tuned by hand, with
