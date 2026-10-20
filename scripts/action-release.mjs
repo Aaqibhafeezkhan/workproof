@@ -17,6 +17,7 @@ export function withSummary(body, summary) {
   const s = body.indexOf(START);
   const e = body.indexOf(END);
   if (s !== -1 && e > s) return body.slice(0, s) + block + body.slice(e + END.length);
+  if (s !== -1 && e !== -1 && e < s) throw new Error("the release body has the workproof markers in the wrong order: the end marker comes before the start marker; fix or remove them by hand");
   if (s !== -1 || e !== -1) throw new Error("the release body has one workproof marker but not the other; fix or remove it by hand");
   const trimmed = body.replace(/\s+$/, "");
   return (trimmed ? `${trimmed}\n\n` : "") + block + "\n";

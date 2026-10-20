@@ -47,6 +47,35 @@ test("the summary is appended to release notes once, and replaced, not duplicate
   }
 });
 
+test("reversed markers are refused with a message about their order, not about a missing marker", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "wp-release-"));
+  try {
+    const reversed = await merge(dir, `notes\n${END}\nmiddle\n${START}\ntail`, SUMMARY);
+    assert.equal(reversed.status, 1);
+    assert.match(reversed.stderr, /markers in the wrong order/);
+    assert.doesNotMatch(reversed.stderr, /but not the other/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("CRLF body keeps the text above and below the block byte-for-byte on replace", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "wp-release-"));
+  try {
+    const above = "## Notes\r\n\r\n- fixed a bug\r\n\r\n";
+    const below = "\r\n\r\n## Thanks\r\n- Ada\r\n";
+    const old = `${START}\r\nold summary\r\n${END}`;
+    const body = above + old + below;
+    const out = await merge(dir, body, SUMMARY);
+    assert.equal(out.status, 0, out.stderr);
+    assert.ok(out.stdout.startsWith(above), "text above the block is preserved byte-for-byte");
+    assert.ok(out.stdout.endsWith(below), "text below the block is preserved byte-for-byte");
+    assert.ok(!out.stdout.includes("old summary"));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("a body with only one marker, or a summary that contains a marker, is refused", async () => {
   const dir = await mkdtemp(join(tmpdir(), "wp-release-"));
   try {

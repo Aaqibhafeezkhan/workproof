@@ -257,6 +257,8 @@ test("the CLI countersigns in one command, check reports it, and check without o
     assert.equal(checked.status, 0, checked.stdout + checked.stderr);
     assert.match(checked.stdout, /^schema ok\nhash ok /);
     assert.match(checked.stdout, /signature valid and bound to this report/);
+    assert.match(checked.stdout, /signed with key type [A-Za-z0-9-]+, SHA256:/);
+    assert.doesNotMatch(checked.stdout, /signed with an? \S+ key/, "the article must not depend on the key type");
     assert.match(checked.stdout, /signer's own label, not verified: "Cem"/);
     assert.match(checked.stdout, /not checked against any list of keys you trust/);
     assert.match(checked.stdout, /What it does not prove[\s\S]*agree beforehand/);

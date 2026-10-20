@@ -167,7 +167,7 @@ async function main() {
     console.log(`countersignature ${r.file}`);
     if (r.keyFingerprint) {
       const trust = r.principal ? `, listed in your allowed signers as ${r.principal}` : listed ? "" : ", not checked against any list of keys you trust (pass --allowed-signers)";
-      console.log(`  signed with a ${r.keyType ?? "unknown type of"} key ${r.keyFingerprint}${trust}`);
+      console.log(`  signed with key type ${r.keyType ?? "unknown"}, ${r.keyFingerprint}${trust}`);
     }
     if (r.label !== undefined) console.log(`  the signer's own label, not verified: ${JSON.stringify(r.label)}`);
     if (r.countersignedAt !== undefined) console.log(`  countersigned at ${r.countersignedAt}`);
