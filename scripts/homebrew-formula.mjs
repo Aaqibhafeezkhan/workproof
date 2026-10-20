@@ -5,11 +5,21 @@
 //   node scripts/homebrew-formula.mjs --version 0.6.2      a specific published version
 //   node scripts/homebrew-formula.mjs --sha256 <hex>       use this checksum instead of downloading
 //   node scripts/homebrew-formula.mjs --tarball x.tgz      hash a local tarball (npm pack output) instead
+//   node scripts/homebrew-formula.mjs --check [file]       fetch the registry tarball for the formula's own
+//                                                          version and fail unless its sha256 matches the
+//                                                          checksum in the formula (default file:
+//                                                          packaging/homebrew/workproof.rb). Needs network.
 //
 // The output is meant for Formula/workproof.rb in a tap repository (Bubblegunn/homebrew-tap, not yet
 // created: that is the maintainer's decision). The formula installs the tarball npm serves, pinned by
-// its sha256. After copying it into a tap, run: brew audit --strict --new <tap>/workproof and
-// brew test <tap>/workproof. Node built-ins only; not shipped in the npm package.
+// its sha256.
+//
+// Release process, in this order, before the formula is copied into a tap:
+//   1. node scripts/homebrew-formula.mjs --check        must print "matches the registry tarball"
+//   2. copy packaging/homebrew/workproof.rb to <tap>/Formula/workproof.rb
+//   3. brew audit --strict --new <tap>/workproof, then brew test <tap>/workproof
+// The default test run is offline. WORKPROOF_NETWORK_TESTS=1 runs the same --check as a test.
+// Node built-ins only; not shipped in the npm package.
 import { createHash } from "node:crypto";
 import { readFileSync, realpathSync } from "node:fs";
 import { join } from "node:path";
@@ -28,7 +38,7 @@ export function renderFormula({ version, sha256 }) {
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
@@ -39,8 +49,32 @@ end
 `;
 }
 
+// Keeps the committed formula honest against the registry, which is the only independent source for
+// its checksum. `fetchImpl` is injectable so the failure paths can run offline.
+export async function checkFormula(text, fetchImpl = fetch) {
+  const version = /^  url "https:\/\/registry\.npmjs\.org\/workproof\/-\/workproof-(\d+\.\d+\.\d+)\.tgz"$/m.exec(text)?.[1];
+  const sha256 = /^  sha256 "([0-9a-f]{64})"$/m.exec(text)?.[1];
+  if (!version || !sha256) throw new Error("the formula must name a registry url with an X.Y.Z version and a 64-hex sha256");
+  const url = `https://registry.npmjs.org/workproof/-/workproof-${version}.tgz`;
+  const res = await fetchImpl(url);
+  if (res.status === 404) throw new Error(`workproof ${version} is not in the npm registry (${url})`);
+  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
+  const actual = createHash("sha256").update(Buffer.from(await res.arrayBuffer())).digest("hex");
+  if (actual !== sha256) {
+    throw new Error(`formula sha256 ${sha256} does not match the registry tarball for ${version} (registry: ${actual})`);
+  }
+  return version;
+}
+
 async function main() {
   const args = process.argv.slice(2);
+  if (args.includes("--check")) {
+    const i = args.indexOf("--check");
+    const file = args[i + 1] && !args[i + 1].startsWith("--") ? args[i + 1] : join(import.meta.dirname, "..", "packaging/homebrew/workproof.rb");
+    const version = await checkFormula(readFileSync(file, "utf8"));
+    process.stdout.write(`ok: ${file} matches the registry tarball for workproof ${version}\n`);
+    return;
+  }
   const flag = (name) => {
     const i = args.indexOf(name);
     if (i === -1) return undefined;

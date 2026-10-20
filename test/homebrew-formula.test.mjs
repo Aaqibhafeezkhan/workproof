@@ -5,7 +5,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { renderFormula } from "../scripts/homebrew-formula.mjs";
+import { checkFormula, renderFormula } from "../scripts/homebrew-formula.mjs";
 import { compareVersions } from "../scripts/version.mjs";
 
 const root = join(import.meta.dirname, "..");
@@ -20,7 +20,7 @@ test("the formula installs the published npm tarball for one version, pinned by 
   assert.match(f, /^  license "MIT"$/m);
   assert.match(f, /^  depends_on "node"$/m);
   assert.match(f, /system "npm", "install", \*std_npm_args/);
-  assert.match(f, /bin\.install_symlink Dir\["#\{libexec\}\/bin\/\*"\]/);
+  assert.match(f, /bin\.install_symlink libexec\.glob\("bin\/\*"\)/);
   assert.match(f, /shell_output\("#\{bin\}\/workproof --version"\)/);
   assert.ok(!f.includes("\u2014"));
 });
@@ -69,4 +69,23 @@ test("the committed formula is valid Ruby", { skip: process.platform === "win32"
   assert.equal(r.error, undefined, "ruby must be installed on Linux and macOS to check the formula");
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /Syntax OK/);
+});
+
+// A fake registry: the same shape of response that fetch returns, with fixed bytes.
+const registry = (status, bytes) => async () => ({ ok: status < 400, status, arrayBuffer: async () => bytes });
+
+test("--check passes when the registry bytes hash to the formula's checksum, and refuses otherwise (offline)", async () => {
+  const bytes = Buffer.from("a stand-in tarball");
+  const sha256 = createHash("sha256").update(bytes).digest("hex");
+  const text = renderFormula({ version: "2.0.0", sha256 });
+  assert.equal(await checkFormula(text, registry(200, bytes)), "2.0.0");
+  await assert.rejects(checkFormula(text, registry(200, Buffer.from("other bytes"))), /does not match the registry tarball/);
+  await assert.rejects(checkFormula(text, registry(404, Buffer.alloc(0))), /is not in the npm registry/);
+});
+
+// Network check: the committed formula against the real registry. Off by default so default and Windows CI stay offline.
+test("the committed formula matches the npm registry tarball for its version", { skip: process.env.WORKPROOF_NETWORK_TESTS === "1" ? false : "offline by default; set WORKPROOF_NETWORK_TESTS=1 to fetch the registry tarball" }, () => {
+  const r = spawnSync("node", [join(root, "scripts/homebrew-formula.mjs"), "--check"], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /matches the registry tarball/);
 });
