@@ -34,3 +34,24 @@ test("the FAQ is question and answer, answers every question, and states the lim
   assert.ok(f.includes("](COMPARISON.md)") && f.includes("](THREAT-MODEL.md)"));
   assert.ok(f.includes("TalentProof"));
 });
+
+test("GEO-PROMPTS has five fixed prompts and a record table", () => {
+  const t = read("docs/GEO-PROMPTS.md");
+  const prompts = [...t.matchAll(/^\d\. Prompt: (.+)$/gm)].map((m) => m[1]);
+  assert.equal(prompts.length, 5);
+  assert.equal(new Set(prompts).size, 5);
+  assert.ok(t.includes("| date | model | prompt number | workproof named | what the answer said |"));
+});
+
+test("LISTINGS carries the npm keywords exactly and the Marketplace description limit", () => {
+  const t = read("docs/LISTINGS.md");
+  const pkg = JSON.parse(read("package.json"));
+  assert.ok(t.includes("Keywords: " + pkg.keywords.join(", ")), "npm keywords differ from package.json");
+  const action = read("action.yml");
+  const name = /^name: (.+)$/m.exec(action)[1].trim();
+  assert.ok(t.includes(`Name: ${name}`), "Marketplace name differs from action.yml");
+  const m = /Marketplace description \((\d+) characters\): (.+)/.exec(t);
+  assert.ok(m, "no Marketplace description line");
+  assert.equal(m[2].trim().length, Number(m[1]), "stated length is wrong");
+  assert.ok(m[2].trim().length < 125, "Marketplace accepts fewer than 125 characters");
+});

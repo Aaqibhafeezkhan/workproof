@@ -11,7 +11,7 @@ export const SENTENCE =
   "workproof is a command-line tool that turns a private git repository into a report of one author's work, with a hash a reader can check and no source code in it.";
 
 // Files that must repeat the sentence word for word. Tasks 5, 6 and 7 add files here.
-const FILES = ["README.md", "docs/FAQ.md", "llms.txt"];
+const FILES = ["README.md", "docs/FAQ.md", "llms.txt", "docs/LISTINGS.md"];
 
 test("package.json description is the category sentence", () => {
   assert.equal(pkg().description, SENTENCE);
