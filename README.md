@@ -323,6 +323,9 @@ result, so a reader who never opens this README still sees the limit.
 A figure that differs is not proof of dishonesty either. Every figure except tenure is
 computed at HEAD, and HEAD moves; `verify` prints the HEAD line first for that reason.
 
+What each command proves, and what none of them protects against, is written down in
+[docs/THREAT-MODEL.md](docs/THREAT-MODEL.md).
+
 In the GitHub Action, `attest: "true"` signs the same statement keylessly with
 [Sigstore](https://www.sigstore.dev): cosign is installed from a SHA-pinned action and
 `cosign attest-blob` writes `workproof-report.sigstore.json`. A reader verifies it with:

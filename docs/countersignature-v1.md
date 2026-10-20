@@ -85,4 +85,4 @@ It does not prove who holds the key unless the reader supplies keys they trust. 
 that the countersigner and the author did not agree beforehand: two people can build a repository
 that never existed and both sign it. It does not prove that the history is honest or that the figures
 measure anything worth measuring. A report with no countersignature is normal and is not suspect.
-The threat model has the full list.
+The [threat model](THREAT-MODEL.md) has the full list.

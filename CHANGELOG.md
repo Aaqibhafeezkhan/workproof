@@ -12,6 +12,13 @@ signature cannot be replayed as a countersignature, and it adds no dependency. `
 it. A report with no countersignature prints exactly what it printed before. Two people who agree beforehand can still
 countersign a repository that never existed; the predicate page says so.
 
+**The threat model is written down (#21).** `docs/THREAT-MODEL.md` names the report author as the main adversary and
+states, for `check`, `verify`, `attest` and `countersign`, what each proves and what it does not protect against,
+including limits that were true and unwritten: an edited report with a recomputed hash passes `check`, `generatedAt`
+and the tool version are outside the hash, and `verify` without a fingerprint key does not check the repository's
+identity. It also records two places where the report writes more than the README says, and that the Sigstore step signs the report file, not the in-toto statement. A test checks that every file the page cites exists, that each
+command section carries both labels, and that the limits still hold in the code.
+
 ## 0.6.2 (2026-10-14)
 
 **CI runs the Action through GitHub's self-repository reference.** The `action` job now says `uses: $/` instead of
