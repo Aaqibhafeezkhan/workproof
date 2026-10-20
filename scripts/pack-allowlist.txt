@@ -11,6 +11,8 @@ dist/src/canonical.d.ts
 dist/src/canonical.js
 dist/src/cli.d.ts
 dist/src/cli.js
+dist/src/countersign.d.ts
+dist/src/countersign.js
 dist/src/exclusions.d.ts
 dist/src/exclusions.js
 dist/src/figures/authorship.d.ts

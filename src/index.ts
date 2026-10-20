@@ -12,3 +12,5 @@ export { badgeFor } from "./badge.js";
 export type { Badge } from "./badge.js";
 export { statementFor, predicateFor, writeStatement, signLocal, PREDICATE_TYPE, STATEMENT_TYPE } from "./attest.js";
 export type { InTotoStatement, Predicate, DsseEnvelope } from "./attest.js";
+export { countersignStatement, signCountersignature, readCountersignature, sshKeyFingerprint, COUNTERSIGN_PREDICATE_TYPE, COUNTERSIGN_NAMESPACE, COUNTERSIGN_CLAIM, COUNTERSIGN_PROVES, COUNTERSIGN_DOES_NOT_PROVE } from "./countersign.js";
+export type { CounterStatement, CounterPredicate, CountersignOptions, CountersignatureReading } from "./countersign.js";
