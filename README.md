@@ -2,42 +2,46 @@
 
 <p align="center">English | <a href="README.tr.md">Türkçe</a></p>
 
-<p align="center"><em>Your best work is in private repos. Prove it anyway.</em></p>
+> Most of my work is in private repositories, and I cannot show anyone what I did there without showing the code.
 
-<p align="center">
-  <img src="https://img.shields.io/npm/v/workproof?style=flat-square&color=111111&label=npm" alt="npm">
-  <img src="https://img.shields.io/npm/dm/workproof?style=flat-square&color=111111" alt="npm downloads">
-  <img src="https://img.shields.io/github/actions/workflow/status/Bubblegunn/workproof/ci.yml?style=flat-square&color=111111&label=ci" alt="ci">
-  <img src="https://img.shields.io/github/stars/Bubblegunn/workproof?style=flat-square&color=111111" alt="stars">
-  <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
-  <a href="https://doi.org/10.5281/zenodo.22394558"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22394558-111111?style=flat-square" alt="DOI"></a>
-  <a href="https://github.com/marketplace/actions/workproof-report"><img src="https://img.shields.io/badge/GitHub_Marketplace-workproof--report-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
-  <a href="https://www.bestpractices.dev/projects/15493"><img src="https://img.shields.io/cii/level/15493?style=flat-square&color=111111&label=openssf%20best%20practices" alt="OpenSSF Best Practices"></a>
-</p>
+workproof is a command-line tool that turns a private git repository into a report of one author's work, with a hash a reader can check and no source code in it. It is the npm package `workproof` from github.com/Bubblegunn/workproof, and it has no connection to the `workproof-schema` repository of TalentProof.
 
-workproof turns a git repository into a verifiable engineering report for one author,
-without showing any code. You run it in the repository you cannot share. The reader gets
-thirteen figures, the exact command behind each one, what each one cannot show, and a
-hash that anyone can recompute offline. It is not a productivity metric: it measures what
-survived and what was touched, and it prints its own limits under every number.
-
-## 30 seconds
+It needs Node 22 or newer and git. Run it inside the repository:
 
 ```
 cd your-private-repo
 npx workproof
 ```
 
-It needs Node 22 or newer and git. That writes `workproof-report.md` (paste it into a résumé, a portfolio, a visa
-application) and `workproof-report.json` (for tools, and for verification). The run below
-is on a public repository, [langchain-ai/openwiki](https://github.com/langchain-ai/openwiki)
-at `1e6d54c`, so anyone can repeat it. `--fingerprint-key` is passed so that the hash is the
-same on every machine; without it the tool makes a random key, prints it once and stores it
-nowhere, and `verify` needs that key later. The two paragraphs `verify` prints after "all
-figures reproduce", which say what it proves and what it does not, are left out here and are in
-[docs/sample/transcript.txt](docs/sample/transcript.txt). The report is committed as
-[docs/sample/openwiki-report.md](docs/sample/openwiki-report.md) and
-[docs/sample/openwiki-report.json](docs/sample/openwiki-report.json).
+That writes `workproof-report.md` (paste it into a résumé, a portfolio or a visa application) and `workproof-report.json` (for tools and for checking). The recording runs it on a public repository, [langchain-ai/openwiki](https://github.com/langchain-ai/openwiki) at `1e6d54c`; the output is committed as a [sample report](docs/sample/openwiki-report.md).
+
+![Terminal recording: workproof writes a report, check prints hash ok, verify prints all figures reproduce, then the two shares are shown](docs/demo.gif)
+
+It is not a productivity metric and does not rank people. It reports what survived and what was touched, and under every figure it prints the git command behind it and what the figure cannot show. A reader who has only the JSON file can run `workproof check` and learn whether it was edited after it was written; that does not prove the repository's history is real ([threat model](docs/THREAT-MODEL.md)). Candidates run it; for a hiring manager, see [For hiring managers](#for-hiring-managers).
+
+<p align="center">
+  <img src="https://img.shields.io/npm/v/workproof?style=flat-square&color=111111&label=npm" alt="npm">
+  <img src="https://img.shields.io/github/actions/workflow/status/Bubblegunn/workproof/ci.yml?style=flat-square&color=111111&label=ci" alt="ci">
+  <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
+  <a href="https://doi.org/10.5281/zenodo.22394558"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22394558-111111?style=flat-square" alt="DOI"></a>
+  <a href="https://github.com/marketplace/actions/workproof-report"><img src="https://img.shields.io/badge/GitHub_Marketplace-workproof--report-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
+  <a href="https://www.bestpractices.dev/projects/15493"><img src="https://img.shields.io/cii/level/15493?style=flat-square&color=111111&label=openssf%20best%20practices" alt="OpenSSF Best Practices"></a>
+</p>
+
+## How this differs
+
+git-fame and gitinspector also report per-author numbers from git. [docs/COMPARISON.md](docs/COMPARISON.md) holds the measured comparison: each tool was run on the same fixture repository on 2026-10-20, once with its defaults and once tuned by hand. These are the rows where workproof is ahead or ties:
+
+- Surviving lines: git-fame 4.2.1 matches `git blame` once it is given `-w -M --ignore-revs-file`; workproof reads `.git-blame-ignore-revs` by default. gitinspector v0.5.1 did not match `git blame` in either run.
+- Bots: workproof removes bot commits before counting. git-fame 4.2.1 listed a bot as an author in both runs.
+- Email addresses: the default output of workproof has none. gitinspector v0.5.1 and onefetch 3.1.0 print one.
+- Checking a report: workproof has `check`, `verify`, `attest` and `countersign` for a report it wrote. The help text of git-fame, gitinspector, git-who and onefetch mentions no verify or attest command.
+
+The rows where workproof is behind are on the same page: running as a git subcommand, writing CSV, HTML or XML, speed against git-fame, git-who and onefetch, and putting private work on the GitHub contribution graph.
+
+## What the run prints
+
+The recording shows the commands below. They run on a public repository, so anyone can repeat them. `--fingerprint-key` is passed so that the hash is the same on every machine; without it the tool makes a random key, prints it once and stores it nowhere, and `verify` needs that key later. The two paragraphs `verify` prints after "all figures reproduce", which say what it proves and what it does not, are left out here and are in [docs/sample/transcript.txt](docs/sample/transcript.txt). The report is committed as [docs/sample/openwiki-report.md](docs/sample/openwiki-report.md) and [docs/sample/openwiki-report.json](docs/sample/openwiki-report.json). `scripts/make-sample.sh` regenerates both, and a test fails when this page and the sample disagree.
 
 ```
 $ npx workproof --author "Colin Francis" --sample 5 --fingerprint-key 9dc900a6227a1faaaa17d774565afbf3
@@ -124,110 +128,6 @@ denominator before anything was counted, which moved this person's commit share 
 window and 70.6% of the lines that are still alive. A commit count alone would have called
 them one contributor among seventy-three. That gap, in either direction, is usually the most
 honest thing a report can say about someone's work.
-
-## When someone reformatted the code
-
-A repository-wide formatter run rewrites lines it did not write. Plain `git blame` then
-credits every one of them to whoever ran the formatter. workproof reads
-`.git-blame-ignore-revs` at the root by default, so those commits are skipped and the
-lines keep their real author; `-w` handles whitespace-only changes on its own, so the
-file matters when a formatter changed quotes, line breaks or trailing commas.
-
-[guidance-ai/guidance](https://github.com/guidance-ai/guidance) at `21b1d90` (21 May 2026)
-lists its black and ruff runs in that file. Two runs per author on 5 September 2026 with
-`--sample 1`; the second passes an empty `--ignore-revs-file`, which is the only way to
-turn the default off:
-
-| author | honouring `.git-blame-ignore-revs` (default) | ignoring it |
-|---|---|---|
-| Harsha Nori, who ran black over the tree in April 2024 | 2,185 of 49,267 surviving lines, 4.4% | 2,476 of 49,267, 5.0% |
-| Scott Lundberg, who wrote most of what black reformatted | 12,368 of 49,267, 25.1% | 12,152 of 49,267, 24.7% |
-
-Without the file, 291 lines of other people's code would have counted for the person who
-ran the formatter, 216 of them taken from one author. The report prints the file it used
-in every `How:` line and under `environment.ignoreRevs` in the JSON, so two reports are
-only comparable when that line matches:
-
-```
-How: `git blame --line-porcelain -w -M --ignore-revs-file .git-blame-ignore-revs HEAD -- <file> over a deterministic 1-in-1 file sample (surviving-lines 0.1.1: FNV-1a on path); generated, vendored and lock files excluded`
-```
-
-## When you are two people
-
-Git has no idea that the address on your laptop and the address on your work machine belong to
-one person. It counts them as two authors, so a report about one of them describes half your
-work and says nothing about the rest, and every figure in it is quietly too small. This is the
-most common way these numbers go wrong and nothing normally tells you.
-
-The report tells you:
-
-```
-**1 other identity in this repository looks like the same person and was not counted here**:
-Efe Genc. The same name, "Efe Genc", on another address. Every figure below therefore describes
-only the work under the identities named above. If they are the same person, re-run with each
-address passed to `--author`, or merge them in a `.mailmap`.
-```
-
-The same line appears as a warning on stderr while the run is happening, and as
-`identity.possiblySplit` in the JSON. Three signals raise it: the same name on another address,
-a GitHub noreply login that matches your address or your name, and the same address name on
-another domain. Role addresses like `dev@` and bot addresses are ignored, because sharing one
-proves nothing.
-
-Without `--emails` the line states only how many other addresses may be the same person and
-tells you to re-run with `--emails`; the reasons are fixed phrases, and no name, login or address
-is written. With `--emails` the names, public emails and reasons are listed.
-
-It is a disclosure, not a correction. The tool cannot know whether two addresses are one person,
-so it never merges them for you: pass each address to `--author`, or write a `.mailmap`, which
-`git log`, `git blame` and `git shortlog` all read as well.
-[`surviving-lines --identities`](https://github.com/Bubblegunn/surviving-lines) prints the
-`.mailmap` lines for a whole repository if you want to fix it once for everyone.
-
-The addresses themselves stay out of the document unless you pass `--emails`, the same rule the
-rest of the report follows.
-
-## Names that are not ASCII
-
-The identity fold decides which commits are yours, so a gap in it is a missing figure rather than
-an ugly one. Two gaps were closed against Unicode 17.0, and both changed counts:
-
-- `Weiß` and `WEISS` are one person. JavaScript's `toLowerCase` is Unicode's simple case fold and
-  leaves ß alone, so the two spellings never met and half of one person's commits fell outside
-  every figure. The full fold maps ß to ss
-  ([CaseFolding.txt](https://www.unicode.org/Public/UCD/latest/ucd/CaseFolding.txt), status `F`),
-  which is what the tool does now.
-- A name typed in fullwidth Latin letters, which is what a Japanese or Korean keyboard produces
-  without switching modes, is the same name typed in ASCII. Matching normalises to NFKC, so the
-  two forms meet, along with the ﬁ ligature and the compatibility ideographs.
-
-Turkish dotted and dotless i and decomposed accents were already folded. The fold is for matching
-only. The report always prints the name git holds.
-
-Display is separate. An Arabic or Hebrew name is the first strong character of the plain-language
-paragraph, and without an isolate it turns the whole paragraph right to left: the English after it
-reverses and the figures land in the wrong order. Names and repository names are wrapped in U+2068
-and U+2069 in the Markdown report, the isolates [UAX #9](https://www.unicode.org/reports/tr9/)
-defines for this. They are invisible, they are added only where a strong right-to-left character
-appears, and they are never written into the JSON, so the hash over a report is unchanged and a
-report written before this still verifies.
-
-Three things here are deliberate:
-
-- Numbers are printed in the `en-US` format wherever a person reads them, so `12,345` is twelve
-  thousand for every reader. The hash is taken over the RFC 8785 canonical JSON, where numbers
-  are not formatted at all, so this cannot affect `workproof verify`. It is about the document:
-  two reports are meant to be read side by side, and a thousands separator that follows the
-  reader's machine makes that harder for no gain.
-- Weeks are ISO weeks, starting on Monday. That is not the local week for most of the world: of
-  the twenty most populous countries, CLDR gives Monday to seven, Sunday to eleven and Saturday
-  to two, which `Intl.Locale.prototype.getWeekInfo` reports in Node 24. Cadence counts weeks a
-  person was active, and that figure is only worth reading next to another report, so it uses one
-  definition everywhere rather than the reader's. The days inside a week are already the author's
-  own local dates, which is what decides whether a Sunday commit belongs to this week or the next.
-- A `.mailmap` name is matched by git, not by this tool. git compares those names ignoring case
-  for ASCII letters only, verified on git 2.50.1: an entry written `josÉ Álvarez` matches a commit
-  by `JOSÉ ÁLVAREZ`, and one written `josé álvarez` does not. Map by address wherever you can.
 
 ## In plain language
 
@@ -512,6 +412,110 @@ jobs:
 The `package` input runs a local npm pack tarball instead of `workproof@<version>` from the
 registry. This repository's CI uses it to run the action on the package built from the commit
 under test; leave it empty to get the released version.
+
+## When someone reformatted the code
+
+A repository-wide formatter run rewrites lines it did not write. Plain `git blame` then
+credits every one of them to whoever ran the formatter. workproof reads
+`.git-blame-ignore-revs` at the root by default, so those commits are skipped and the
+lines keep their real author; `-w` handles whitespace-only changes on its own, so the
+file matters when a formatter changed quotes, line breaks or trailing commas.
+
+[guidance-ai/guidance](https://github.com/guidance-ai/guidance) at `21b1d90` (21 May 2026)
+lists its black and ruff runs in that file. Two runs per author on 5 September 2026 with
+`--sample 1`; the second passes an empty `--ignore-revs-file`, which is the only way to
+turn the default off:
+
+| author | honouring `.git-blame-ignore-revs` (default) | ignoring it |
+|---|---|---|
+| Harsha Nori, who ran black over the tree in April 2024 | 2,185 of 49,267 surviving lines, 4.4% | 2,476 of 49,267, 5.0% |
+| Scott Lundberg, who wrote most of what black reformatted | 12,368 of 49,267, 25.1% | 12,152 of 49,267, 24.7% |
+
+Without the file, 291 lines of other people's code would have counted for the person who
+ran the formatter, 216 of them taken from one author. The report prints the file it used
+in every `How:` line and under `environment.ignoreRevs` in the JSON, so two reports are
+only comparable when that line matches:
+
+```
+How: `git blame --line-porcelain -w -M --ignore-revs-file .git-blame-ignore-revs HEAD -- <file> over a deterministic 1-in-1 file sample (surviving-lines 0.1.1: FNV-1a on path); generated, vendored and lock files excluded`
+```
+
+## When you are two people
+
+Git has no idea that the address on your laptop and the address on your work machine belong to
+one person. It counts them as two authors, so a report about one of them describes half your
+work and says nothing about the rest, and every figure in it is quietly too small. This is the
+most common way these numbers go wrong and nothing normally tells you.
+
+The report tells you:
+
+```
+**1 other identity in this repository looks like the same person and was not counted here**:
+Efe Genc. The same name, "Efe Genc", on another address. Every figure below therefore describes
+only the work under the identities named above. If they are the same person, re-run with each
+address passed to `--author`, or merge them in a `.mailmap`.
+```
+
+The same line appears as a warning on stderr while the run is happening, and as
+`identity.possiblySplit` in the JSON. Three signals raise it: the same name on another address,
+a GitHub noreply login that matches your address or your name, and the same address name on
+another domain. Role addresses like `dev@` and bot addresses are ignored, because sharing one
+proves nothing.
+
+Without `--emails` the line states only how many other addresses may be the same person and
+tells you to re-run with `--emails`; the reasons are fixed phrases, and no name, login or address
+is written. With `--emails` the names, public emails and reasons are listed.
+
+It is a disclosure, not a correction. The tool cannot know whether two addresses are one person,
+so it never merges them for you: pass each address to `--author`, or write a `.mailmap`, which
+`git log`, `git blame` and `git shortlog` all read as well.
+[`surviving-lines --identities`](https://github.com/Bubblegunn/surviving-lines) prints the
+`.mailmap` lines for a whole repository if you want to fix it once for everyone.
+
+The addresses themselves stay out of the document unless you pass `--emails`, the same rule the
+rest of the report follows.
+
+## Names that are not ASCII
+
+The identity fold decides which commits are yours, so a gap in it is a missing figure rather than
+an ugly one. Two gaps were closed against Unicode 17.0, and both changed counts:
+
+- `Weiß` and `WEISS` are one person. JavaScript's `toLowerCase` is Unicode's simple case fold and
+  leaves ß alone, so the two spellings never met and half of one person's commits fell outside
+  every figure. The full fold maps ß to ss
+  ([CaseFolding.txt](https://www.unicode.org/Public/UCD/latest/ucd/CaseFolding.txt), status `F`),
+  which is what the tool does now.
+- A name typed in fullwidth Latin letters, which is what a Japanese or Korean keyboard produces
+  without switching modes, is the same name typed in ASCII. Matching normalises to NFKC, so the
+  two forms meet, along with the ﬁ ligature and the compatibility ideographs.
+
+Turkish dotted and dotless i and decomposed accents were already folded. The fold is for matching
+only. The report always prints the name git holds.
+
+Display is separate. An Arabic or Hebrew name is the first strong character of the plain-language
+paragraph, and without an isolate it turns the whole paragraph right to left: the English after it
+reverses and the figures land in the wrong order. Names and repository names are wrapped in U+2068
+and U+2069 in the Markdown report, the isolates [UAX #9](https://www.unicode.org/reports/tr9/)
+defines for this. They are invisible, they are added only where a strong right-to-left character
+appears, and they are never written into the JSON, so the hash over a report is unchanged and a
+report written before this still verifies.
+
+Three things here are deliberate:
+
+- Numbers are printed in the `en-US` format wherever a person reads them, so `12,345` is twelve
+  thousand for every reader. The hash is taken over the RFC 8785 canonical JSON, where numbers
+  are not formatted at all, so this cannot affect `workproof verify`. It is about the document:
+  two reports are meant to be read side by side, and a thousands separator that follows the
+  reader's machine makes that harder for no gain.
+- Weeks are ISO weeks, starting on Monday. That is not the local week for most of the world: of
+  the twenty most populous countries, CLDR gives Monday to seven, Sunday to eleven and Saturday
+  to two, which `Intl.Locale.prototype.getWeekInfo` reports in Node 24. Cadence counts weeks a
+  person was active, and that figure is only worth reading next to another report, so it uses one
+  definition everywhere rather than the reader's. The days inside a week are already the author's
+  own local dates, which is what decides whether a Sunday commit belongs to this week or the next.
+- A `.mailmap` name is matched by git, not by this tool. git compares those names ignoring case
+  for ASCII letters only, verified on git 2.50.1: an entry written `josÉ Álvarez` matches a commit
+  by `JOSÉ ÁLVAREZ`, and one written `josé álvarez` does not. Map by address wherever you can.
 
 ## Gaming and bias
 

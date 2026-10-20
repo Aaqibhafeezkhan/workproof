@@ -2,50 +2,64 @@
 
 <p align="center"><a href="README.md">English</a> | Türkçe</p>
 
-<p align="center"><em>En iyi işin özel repolarda. Yine de kanıtla.</em></p>
+> Yaptığım işin çoğu özel repolarda. Orada ne yaptığımı, kodu göstermeden kimseye gösteremiyorum.
 
-<p align="center">
-  <img src="https://img.shields.io/npm/v/workproof?style=flat-square&color=111111&label=npm" alt="npm">
-  <img src="https://img.shields.io/github/stars/Bubblegunn/workproof?style=flat-square&color=111111" alt="stars">
-  <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
-  <a href="https://github.com/marketplace/actions/workproof-report"><img src="https://img.shields.io/badge/GitHub_Marketplace-workproof--report-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
-  <a href="https://www.bestpractices.dev/projects/15493"><img src="https://img.shields.io/cii/level/15493?style=flat-square&color=111111&label=openssf%20best%20practices" alt="OpenSSF Best Practices"></a>
-</p>
+workproof is a command-line tool that turns a private git repository into a report of one author's work, with a hash a reader can check and no source code in it.
 
-workproof, bir git deposunu tek bir yazar için doğrulanabilir bir mühendislik raporuna
-çevirir; hiçbir kod göstermeden. Paylaşamadığınız depoda çalıştırırsınız. Okuyan kişi on üç
-figür, her birinin arkasındaki tam komutu, her birinin neyi gösteremediğini ve herkesin
-çevrimdışı yeniden hesaplayabileceği bir hash alır. Bir verimlilik ölçütü değildir: neyin
-hayatta kaldığını ve neye dokunulduğunu ölçer, her sayının altına kendi sınırlarını yazar.
+workproof, özel bir git deposunu tek bir yazarın işinin raporuna çeviren bir komut satırı aracıdır. Raporda kaynak kod yoktur; okuyan kişi raporun yazıldıktan sonra değiştirilmediğini bir hash ile denetleyebilir. Npm paketi `workproof`, github.com/Bubblegunn/workproof deposundan gelir ve TalentProof'un `workproof-schema` deposuyla bir ilgisi yoktur.
 
-## 30 saniye
+Node 22 veya daha yeni bir sürüm ile git gerekir. Aracı deponun içinde çalıştırın:
 
 ```
 cd your-private-repo
 npx workproof
 ```
 
-Node 22 veya daha yenisi ve git gerekir. Bu, `workproof-report.md` (bir özgeçmişe, portfolyoya, vize başvurusuna yapıştırın) ve
-`workproof-report.json` (araçlar ve doğrulama için) dosyalarını yazar. Aşağıdaki örneğin
-arkasındaki gerçek çalıştırma, [langchain-ai/openwiki](https://github.com/langchain-ai/openwiki)
-deposunun `1e6d54c` sürümünde:
+Bu komut `workproof-report.md` dosyasını yazar (özgeçmişe, portfolyoya ya da vize başvurusuna yapıştırabilirsiniz) ve `workproof-report.json` dosyasını yazar (araçlar ve denetleme için). Kayıt, [langchain-ai/openwiki](https://github.com/langchain-ai/openwiki) deposunun `1e6d54c` sürümünde çalıştırıldı; çıktı [örnek rapor](docs/sample/openwiki-report.md) olarak depoda duruyor.
+
+![Terminal kaydı: workproof raporu yazar, check hash ok der, verify tüm figürlerin yeniden hesaplandığını söyler, sonra iki paylaşım gösterilir](docs/demo.gif)
+
+Bu bir verimlilik ölçütü değildir ve insanları sıralamaz. Hayatta kalanı ve dokunulanı ölçer; her figürün altında onun arkasındaki git komutunu ve neyi gösteremediğini yazar. Yalnızca JSON dosyası olan biri `workproof check` komutunu çalıştırıp dosyanın yazıldıktan sonra değiştirilip değiştirilmediğini öğrenebilir. Bu, deponun geçmişinin gerçek olduğunu kanıtlamaz ([tehdit modeli](docs/THREAT-MODEL.md)). Adaylar aracı çalıştırır; işe alan kişi için [README.md#for-hiring-managers](README.md#for-hiring-managers) bölümüne bakın.
+
+<p align="center">
+  <img src="https://img.shields.io/npm/v/workproof?style=flat-square&color=111111&label=npm" alt="npm">
+  <img src="https://img.shields.io/github/actions/workflow/status/Bubblegunn/workproof/ci.yml?style=flat-square&color=111111&label=ci" alt="ci">
+  <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
+  <a href="https://doi.org/10.5281/zenodo.22394558"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22394558-111111?style=flat-square" alt="DOI"></a>
+  <a href="https://github.com/marketplace/actions/workproof-report"><img src="https://img.shields.io/badge/GitHub_Marketplace-workproof--report-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
+  <a href="https://www.bestpractices.dev/projects/15493"><img src="https://img.shields.io/cii/level/15493?style=flat-square&color=111111&label=openssf%20best%20practices" alt="OpenSSF Best Practices"></a>
+</p>
+
+## Bu aracın farkı
+
+git-fame ve gitinspector de git'ten kişi başına sayılar çıkarır. [docs/COMPARISON.md](docs/COMPARISON.md) ölçülmüş karşılaştırmayı içerir: her araç 2026-10-20 tarihinde aynı örnek depoda bir kez varsayılanlarıyla, bir kez elle ayarlanmış haliyle çalıştırıldı. Aşağıdakiler workproof'un önde olduğu ya da eşit olduğu satırlardır:
+
+- Hayatta kalan satırlar: git-fame 4.2.1, `-w -M --ignore-revs-file` verildiğinde `git blame` ile eşleşiyor; workproof ise varsayılan olarak `.git-blame-ignore-revs` dosyasını okuyor. gitinspector v0.5.1 iki çalıştırmada da `git blame` ile eşleşmedi.
+- Botlar: workproof saymadan önce bot commit'lerini çıkarır. git-fame 4.2.1 iki çalıştırmada da bir botu yazar olarak listeledi.
+- E-posta adresleri: workproof'un varsayılan çıktısında hiç e-posta adresi yok. gitinspector v0.5.1 ve onefetch 3.1.0 birer tane yazıyor.
+- Raporu denetleme: workproof kendi yazdığı bir raporu denetlemek için `check`, `verify`, `attest` ve `countersign` komutlarına sahip. git-fame, gitinspector, git-who ve onefetch'in yardım metinlerinde verify ya da attest komutu geçmiyor.
+
+Workproof'un geride kaldığı satırlar aynı sayfada: git alt komutu olarak çalışmak, CSV, HTML ya da XML yazmak, git-fame, git-who ve onefetch'e karşı hız, ve özel çalışmayı GitHub katkı grafiğine yansıtmak (contributions-importer'a karşı).
+
+## Çalıştırma ne yazar
+
+Kayıt aşağıdaki komutları gösterir. Komutlar herkese açık bir depoda çalışır, böylece herkes tekrarlayabilir. `--fingerprint-key` her makinede aynı hash'in çıkması için verilir; verilmezse araç rastgele bir anahtar üretir, bir kez yazdırır ve hiçbir yerde saklamaz, `verify` ise bu anahtara sonradan ihtiyaç duyar. `verify`'ın "all figures reproduce" satırından sonra yazdığı, neyi kanıtladığını ve neyi kanıtlamadığını anlatan iki paragraf burada yok; [docs/sample/transcript.txt](docs/sample/transcript.txt) dosyasında duruyor. Rapor [docs/sample/openwiki-report.md](docs/sample/openwiki-report.md) ve [docs/sample/openwiki-report.json](docs/sample/openwiki-report.json) olarak commit edildi. `scripts/make-sample.sh` ikisini yeniden üretir; bu sayfa ile örnek birbirinden ayrılırsa bir test başarısız olur.
 
 ```
-$ npx workproof --author "Colin Francis" --sample 5
-fingerprint key 9dc900a6227a1faaaa17d774565afbf3 (keep it to compare reports or to verify the fingerprint; it is not stored)
+$ npx workproof --author "Colin Francis" --sample 5 --fingerprint-key 9dc900a6227a1faaaa17d774565afbf3
 openwiki: reading history...
 openwiki: 369 commits read
 openwiki: blaming files (1 in 5 sample)...
 openwiki: blamed 123 of 547 files
-wrote workproof-report.md and workproof-report.json in 2.7s
+wrote workproof-report.md and workproof-report.json in 1.0s
 
 $ npx workproof check workproof-report.json
 schema ok
-hash ok 63d4fd1373b06b090086a653d52dfed234edcf35645bce3a34137a0447049355
+hash ok f0fc23197ef76c471c06bccaa57e1e711440635a7e4af8634f5f711f7819a911
 
 $ npx workproof verify workproof-report.json --fingerprint-key 9dc900a6227a1faaaa17d774565afbf3
 schema ok
-hash ok 63d4fd1373b06b090086a653d52dfed234edcf35645bce3a34137a0447049355
+hash ok f0fc23197ef76c471c06bccaa57e1e711440635a7e4af8634f5f711f7819a911
 openwiki: fingerprint ok
 all figures reproduce
 ```
