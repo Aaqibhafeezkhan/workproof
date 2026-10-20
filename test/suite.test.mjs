@@ -14,14 +14,16 @@ const script = () => JSON.parse(readFileSync(join(root, "package.json"), "utf8")
 test("every TypeScript test is named in the npm test script", () => {
   const s = script();
   const onDisk = readdirSync(join(root, "test")).filter((f) => f.endsWith(".test.ts"));
-  const missing = onDisk.filter((f) => !s.includes(`dist/test/${f.replace(/\.ts$/, ".js")}`));
+  const tokens = s.split(/\s+/);
+  const missing = onDisk.filter((f) => !tokens.includes(`dist/test/${f.replace(/\.ts$/, ".js")}`));
   assert.deepEqual(missing, [], `not run by npm test: ${missing.join(", ")}`);
 });
 
 test("every .mjs test is named in the npm test script", () => {
   const s = script();
   const onDisk = readdirSync(join(root, "test")).filter((f) => f.endsWith(".test.mjs"));
-  const missing = onDisk.filter((f) => !s.includes(`test/${f}`));
+  const tokens = s.split(/\s+/);
+  const missing = onDisk.filter((f) => !tokens.includes(`test/${f}`));
   assert.deepEqual(missing, [], `not run by npm test: ${missing.join(", ")}`);
 });
 

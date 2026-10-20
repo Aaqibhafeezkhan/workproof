@@ -119,6 +119,24 @@ test("a clone that is not at the report's commit is refused and told which commi
   }
 });
 
+test("a clone behind the report's commit is refused and names the commit the report was made at", async () => {
+  const dir = await makeRepo();
+  const { clone, base } = await cloneOf(dir);
+  try {
+    // The author moves on after the clone was taken, then reports: the clone is now behind.
+    execFileSync("git", ["-c", "user.name=Ada", "-c", "user.email=ada@example.com", "commit", "-q", "--allow-empty", "-m", "newer"], { cwd: dir });
+    const report = await reportOf(dir);
+    await assert.rejects(countersignStatement(report, [clone], { ...opts, fingerprintKey: KEY }), (e: Error) => {
+      assert.match(e.message, /not at the commit the report was made at/);
+      assert.ok(e.message.includes(report.repositories[0]!.head.slice(0, 12)), "names the report's commit");
+      return true;
+    });
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+    await rm(base, { recursive: true, force: true });
+  }
+});
+
 test("a shallow clone is refused with the unshallow advice", async () => {
   const dir = await makeRepo();
   const base = await mkdtemp(join(tmpdir(), "workproof-shallow-"));
@@ -187,6 +205,8 @@ test("a countersignature reads back as valid, and fails when it is moved, edited
     const tampered = await readCountersignature(join(base, "edited.dsse.json"), report);
     assert.equal(tampered.ok, false);
     assert.match(tampered.problems.join("\n"), /does not match the statement/);
+    assert.match(tampered.problems.join("\n"), /incorrect signature/, "ssh-keygen's reason: the bytes changed");
+    assert.doesNotMatch(tampered.problems.join("\n"), /namespace does not match/);
 
     // A signature made for the author's attest namespace is not a countersignature.
     await writeFile(join(base, "ns.json"), original);
@@ -196,6 +216,8 @@ test("a countersignature reads back as valid, and fails when it is moved, edited
     const replay = await readCountersignature(join(base, "ns.dsse.json"), report);
     assert.equal(replay.ok, false);
     assert.match(replay.problems.join("\n"), /does not match the statement/);
+    assert.match(replay.problems.join("\n"), /namespace does not match/, "ssh-keygen's reason: signed for another namespace");
+    assert.doesNotMatch(replay.problems.join("\n"), /incorrect signature/);
 
     // A file that is not an envelope, and a file that does not exist.
     await writeFile(join(base, "junk.json"), "{}");

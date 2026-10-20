@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import type { Report } from "./report.js";
 import { verifyReport } from "./verify.js";
 import { STATEMENT_TYPE, PAYLOAD_TYPE } from "./attest.js";
@@ -126,7 +126,8 @@ export async function signCountersignature(
   if (!pub.ok) throw new Error(`ssh-keygen -y failed: ${firstLine(pub.stderr) || "no output"}`);
   const keyFingerprint = sshKeyFingerprint(pub.stdout);
   const id = keyFingerprint.slice("SHA256:".length).replace(/[^A-Za-z0-9]/g, "").slice(0, 10);
-  const base = `${stem(reportPath)}.countersign-${id}`;
+  // Absolute, so a report named "-r.json" cannot make ssh-keygen read the statement path as an option.
+  const base = resolve(`${stem(reportPath)}.countersign-${id}`);
   const statementPath = `${base}.intoto.json`;
   await writeFile(statementPath, JSON.stringify(statement, null, 2) + "\n");
   const signature = `${statementPath}.sig`;
