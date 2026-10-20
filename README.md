@@ -29,26 +29,31 @@ npx workproof
 ```
 
 It needs Node 22 or newer and git. That writes `workproof-report.md` (paste it into a résumé, a portfolio, a visa
-application) and `workproof-report.json` (for tools, and for verification). This is the
-real transcript of the run behind the example below, on a clone of
-[langchain-ai/openwiki](https://github.com/langchain-ai/openwiki) at `1e6d54c`:
+application) and `workproof-report.json` (for tools, and for verification). The run below
+is on a public repository, [langchain-ai/openwiki](https://github.com/langchain-ai/openwiki)
+at `1e6d54c`, so anyone can repeat it. `--fingerprint-key` is passed so that the hash is the
+same on every machine; without it the tool makes a random key, prints it once and stores it
+nowhere, and `verify` needs that key later. The two paragraphs `verify` prints after "all
+figures reproduce", which say what it proves and what it does not, are left out here and are in
+[docs/sample/transcript.txt](docs/sample/transcript.txt). The report is committed as
+[docs/sample/openwiki-report.md](docs/sample/openwiki-report.md) and
+[docs/sample/openwiki-report.json](docs/sample/openwiki-report.json).
 
 ```
-$ npx workproof --author "Colin Francis" --sample 5
-fingerprint key 9dc900a6227a1faaaa17d774565afbf3 (keep it to compare reports or to verify the fingerprint; it is not stored)
+$ npx workproof --author "Colin Francis" --sample 5 --fingerprint-key 9dc900a6227a1faaaa17d774565afbf3
 openwiki: reading history...
 openwiki: 369 commits read
 openwiki: blaming files (1 in 5 sample)...
 openwiki: blamed 123 of 547 files
-wrote workproof-report.md and workproof-report.json in 2.7s
+wrote workproof-report.md and workproof-report.json in 1.0s
 
 $ npx workproof check workproof-report.json
 schema ok
-hash ok 63d4fd1373b06b090086a653d52dfed234edcf35645bce3a34137a0447049355
+hash ok f0fc23197ef76c471c06bccaa57e1e711440635a7e4af8634f5f711f7819a911
 
 $ npx workproof verify workproof-report.json --fingerprint-key 9dc900a6227a1faaaa17d774565afbf3
 schema ok
-hash ok 63d4fd1373b06b090086a653d52dfed234edcf35645bce3a34137a0447049355
+hash ok f0fc23197ef76c471c06bccaa57e1e711440635a7e4af8634f5f711f7819a911
 openwiki: fingerprint ok
 all figures reproduce
 ```
@@ -65,7 +70,7 @@ they are cut here for length.
 ```
 ## openwiki
 
-HEAD 1e6d54cdfeec · fingerprint bc554285a25c705c · identities: Colin Francis
+HEAD 1e6d54cdfeec · fingerprint a1b19a27aab4a577 · identities: Colin Francis
 
 excluded 64 bot commits and 1 generated, vendored or lock file (2.6% of lines added)
 

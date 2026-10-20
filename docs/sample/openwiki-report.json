@@ -1,0 +1,369 @@
+{
+  "tool": "workproof",
+  "schemaVersion": 2,
+  "version": "0.6.2",
+  "generatedAt": "2026-10-20T21:52:07.568Z",
+  "params": {
+    "depth": 2,
+    "threshold": 0.5,
+    "minCommits": 5,
+    "paths": false,
+    "emails": false,
+    "exclusions": true,
+    "exclude": [],
+    "seed": "",
+    "copies": false,
+    "sample": 5,
+    "author": [
+      "Colin Francis"
+    ]
+  },
+  "repositories": [
+    {
+      "name": "openwiki",
+      "head": "1e6d54cdfeec334c29cf61800610193f33dc0d24",
+      "fingerprint": "a1b19a27aab4a577c5ce15c5bf87d30dc9c264bbadd2560bb3650643e22d3240",
+      "fingerprintKeyed": true,
+      "identity": {
+        "emails": [],
+        "names": [
+          "Colin Francis"
+        ],
+        "count": 2
+      },
+      "environment": {
+        "git": "git version 2.50.1 (Apple Git-155)",
+        "blame": [
+          "-w",
+          "-M"
+        ],
+        "ignoreRevs": null,
+        "seed": ""
+      },
+      "excluded": {
+        "botCommits": 64,
+        "files": 1,
+        "linesAddedShare": 0.02570515105605561,
+        "enabled": true
+      },
+      "figures": [
+        {
+          "id": "tenure",
+          "title": "Tenure window",
+          "value": {
+            "first": "2026-07-06",
+            "last": "2026-09-03",
+            "days": 60
+          },
+          "command": "git log --format=%aI --author=<identity>; first and last commit dates",
+          "limits": [
+            "Tenure is measured from commits, so work before the first commit or after the last is invisible.",
+            "The first and last days are read in the offset each commit records, so they are the author's calendar days rather than UTC days."
+          ]
+        },
+        {
+          "id": "commitShare",
+          "title": "Share of commits in tenure",
+          "value": {
+            "author": 71,
+            "total": 235,
+            "share": 0.3021276595744681
+          },
+          "command": "git log --no-merges --format=%aE --since=<first> --until=<last>; count by author over all",
+          "limits": [
+            "Commits measure activity, not what survived. One commit can be a typo or a subsystem.",
+            "Squash-merged branches count once regardless of size."
+          ]
+        },
+        {
+          "id": "cadence",
+          "title": "Cadence",
+          "value": {
+            "activeWeeks": 9,
+            "weeksInTenure": 9,
+            "commitsPerActiveWeek": 7.9,
+            "longestStreakWeeks": 9,
+            "tagsInTenure": 21,
+            "authorTags": 1
+          },
+          "command": "git log --no-merges --format=%aI --author=<identity>; ISO weeks in the author's own offset; git for-each-ref refs/tags with creatordate",
+          "limits": [
+            "A week with one commit and a week with forty both count as active.",
+            "Tags are releases only if the project tags releases.",
+            "Weeks are ISO weeks read in the offset each commit records, so they are the author's weeks; a commit made Monday morning in Auckland counts as Monday, not as the previous week."
+          ]
+        },
+        {
+          "id": "footprint",
+          "title": "Footprint",
+          "value": {
+            "filesTouched": 693,
+            "ownedDirectories": [
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 6,
+                "total": 6,
+                "share": 1
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 5,
+                "total": 5,
+                "share": 1
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 8,
+                "total": 9,
+                "share": 0.8888888888888888
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 14,
+                "total": 16,
+                "share": 0.875
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 13,
+                "total": 15,
+                "share": 0.8666666666666667
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 8,
+                "total": 10,
+                "share": 0.8
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 4,
+                "total": 5,
+                "share": 0.8
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 6,
+                "total": 8,
+                "share": 0.75
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 8,
+                "total": 11,
+                "share": 0.7272727272727273
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 7,
+                "total": 10,
+                "share": 0.7
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 20,
+                "total": 34,
+                "share": 0.5882352941176471
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 5,
+                "total": 9,
+                "share": 0.5555555555555556
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 7,
+                "total": 13,
+                "share": 0.5384615384615384
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 7,
+                "total": 14,
+                "share": 0.5
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 4,
+                "total": 8,
+                "share": 0.5
+              },
+              {
+                "path": "(hidden; run with --paths)",
+                "author": 3,
+                "total": 6,
+                "share": 0.5
+              }
+            ],
+            "languages": [
+              {
+                "language": "TypeScript",
+                "lines": 98049,
+                "share": 0.8137251647384932
+              },
+              {
+                "language": "JSON",
+                "lines": 11669,
+                "share": 0.09684299633176756
+              },
+              {
+                "language": "Markdown",
+                "lines": 8573,
+                "share": 0.07114877089315651
+              },
+              {
+                "language": "JavaScript",
+                "lines": 1950,
+                "share": 0.016183378425481766
+              },
+              {
+                "language": "YAML",
+                "lines": 253,
+                "share": 0.0020996896111009676
+              }
+            ]
+          },
+          "command": "git log --no-merges --numstat -M; directories at depth 2 where the author's commit share is at least 50% over at least 5 commits; languages by lines added, extension map",
+          "limits": [
+            "Generated, vendored, lock and snapshot files are excluded by the built-in lists and .gitattributes; anything they miss still counts.",
+            "A directory owned by commit count may still contain other people's surviving code; see the blame figure."
+          ]
+        },
+        {
+          "id": "testsAndDocs",
+          "title": "Test-file changes and documents created",
+          "value": {
+            "testChangesAuthor": 393,
+            "testChangesTotal": 657,
+            "testShare": 0.5981735159817352,
+            "docsCreated": 101
+          },
+          "command": "git log --no-merges --numstat; test paths match __tests__/, test/, tests/, spec/, e2e/ or *.test.* / *.spec.*; a document (.md, .mdx, .rst) is created by whoever made its oldest commit in the history read",
+          "limits": [
+            "Test-file changes are counted, not test cases or coverage.",
+            "A one-line README and a design document count the same; a document rewritten by someone else stays with its creator."
+          ]
+        },
+        {
+          "id": "filesAuthored",
+          "title": "Files authored",
+          "value": {
+            "authored": 455,
+            "total": 555,
+            "share": 0.8198198198198198
+          },
+          "command": "git log --no-merges --numstat -M over the history read; DOA = 3.293 + 1.098*FA + 0.164*DL - 0.321*ln(1 + AC) per file and author (Avelino et al.); authored when DOA is at least 3.293 and above 75% of the file's maximum; over files alive at HEAD",
+          "limits": [
+            "The coefficients were fitted on other systems; first authorship outweighs later rewrites, so a file rewritten from scratch by someone else can stay with its creator.",
+            "A file that was renamed carries its history only when git detected the rename."
+          ]
+        },
+        {
+          "id": "majorContributor",
+          "title": "Major-contributor components",
+          "value": {
+            "major": 59,
+            "dirs": 65,
+            "threshold": 0.05
+          },
+          "command": "git log --no-merges --numstat; directories at depth 2 where the author's share of commits touching them is at least 5% (Bird et al.)",
+          "limits": [
+            "Commit exposure treats a typo and a subsystem alike; five percent of the commits to a directory is a low bar by design."
+          ]
+        },
+        {
+          "id": "commitSize",
+          "title": "Commit size",
+          "value": {
+            "median": 166,
+            "p90": 9234,
+            "huge": 6
+          },
+          "command": "git log --no-merges --numstat --author=<identity>; added plus deleted lines per commit over included files; median and 90th percentile by nearest rank; huge counts commits over 10,000 lines",
+          "limits": [
+            "Size is not value. Imports, vendoring that slipped past the exclusions and reformat commits dominate the 90th percentile."
+          ]
+        },
+        {
+          "id": "coAuthored",
+          "title": "Co-authored commits",
+          "value": {
+            "trailerCommits": 119
+          },
+          "command": "git log --no-merges --format=%(trailers:key=Co-authored-by); commits by another author whose trailer names one of the subject's emails",
+          "limits": [
+            "Trailers are written by whoever merges and can be absent or wrong; pairing without a trailer is invisible."
+          ]
+        },
+        {
+          "id": "absenceFactor",
+          "title": "Absence factor",
+          "value": {
+            "authorsToHalf": 4,
+            "authorRank": 1,
+            "authors": 73
+          },
+          "command": "git log --no-merges --format=%aE; authors sorted by commit count; the smallest set covering 50% of commits (CHAOSS Contributor Absence Factor); the subject's rank by commit count",
+          "limits": [
+            "An author with several unmerged email addresses counts as several people; drive-by commits count as authors."
+          ]
+        },
+        {
+          "id": "aiAssisted",
+          "title": "AI-assisted commits",
+          "value": {
+            "commits": 1,
+            "share": 0.014084507042253521
+          },
+          "command": "git log --no-merges --format=%aN%(trailers:key=Co-authored-by)%(trailers:key=Assisted-by) --author=<identity>; commits naming Claude, Cursor, Copilot, Codex, Gemini, ChatGPT, Aider, Devin or Windsurf in a trailer, or an author name ending in (aider)",
+          "limits": [
+            "The absence of a trailer is not evidence of unassisted work.",
+            "Blame credits the human for every line, so surviving lines say nothing about who typed them; authorship no longer implies comprehension.",
+            "These commits are never excluded from any other figure."
+          ]
+        },
+        {
+          "id": "survivingLines",
+          "title": "Surviving lines at HEAD",
+          "value": {
+            "lines": 23317,
+            "linesAttributed": 33038,
+            "share": 0.7057630607179611,
+            "filesSampled": 123,
+            "filesTotal": 547,
+            "sample": 5,
+            "seed": "",
+            "byYear": [
+              {
+                "year": 2026,
+                "lines": 23317
+              }
+            ]
+          },
+          "command": "git blame --line-porcelain -w -M HEAD -- <file> over a deterministic 1-in-5 file sample (surviving-lines 0.1.7: FNV-1a on path); generated, vendored and lock files excluded",
+          "limits": [
+            "Survivorship, not merit: code deleted on purpose counts for nobody.",
+            "Whitespace and moved lines keep their original author; copied lines do not unless --copies is used.",
+            "A reformat commit takes every line it touched; list such commits in .git-blame-ignore-revs."
+          ]
+        },
+        {
+          "id": "survivalByCohort",
+          "title": "Survival by cohort",
+          "value": [
+            {
+              "year": 2026,
+              "lines": 23317
+            }
+          ],
+          "command": "the same git blame --line-porcelain pass as the surviving-lines figure (1-in-5 sample); the subject's lines bucketed by author-time year",
+          "limits": [
+            "Newer cohorts have had less time to die; comments and licence headers survive indefinitely."
+          ]
+        }
+      ]
+    }
+  ],
+  "hash": "f0fc23197ef76c471c06bccaa57e1e711440635a7e4af8634f5f711f7819a911"
+}

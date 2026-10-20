@@ -1,0 +1,19 @@
+$ npx workproof --author "Colin Francis" --sample 5 --fingerprint-key 9dc900a6227a1faaaa17d774565afbf3
+openwiki: reading history...
+openwiki: 369 commits read
+openwiki: blaming files (1 in 5 sample)...
+openwiki: blamed 123 of 547 files
+wrote workproof-report.md and workproof-report.json in 1.0s
+
+$ npx workproof check workproof-report.json
+schema ok
+hash ok f0fc23197ef76c471c06bccaa57e1e711440635a7e4af8634f5f711f7819a911
+
+$ npx workproof verify workproof-report.json --fingerprint-key 9dc900a6227a1faaaa17d774565afbf3
+schema ok
+hash ok f0fc23197ef76c471c06bccaa57e1e711440635a7e4af8634f5f711f7819a911
+openwiki: fingerprint ok
+all figures reproduce
+
+What this proves: every figure in the report was recomputed from this repository just now and came out the same, and the document has not been edited since it was written.
+What it does not prove: that the repository itself is honest history, that the figures measure anything worth measuring, or that the work was good. A repository whose history was rewritten before the report was made reproduces perfectly.
