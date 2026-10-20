@@ -148,6 +148,10 @@ jobs:
           cat "$RUNNER_TEMP/comment.md"
           if grep -Eq 'undefined|NaN' "$RUNNER_TEMP/comment.md"; then echo "the comment printed undefined or NaN"; exit 1; fi
           test "$(grep -c '^| ' "$RUNNER_TEMP/comment.md")" -eq 9 || { echo "the comment table does not have its header and eight rows"; exit 1; }
+          : > "$RUNNER_TEMP/release-notes.md"
+          node scripts/action-release.mjs "$RUNNER_TEMP/release-notes.md" "$RUNNER_TEMP/comment.md" > "$RUNNER_TEMP/release-body.md"
+          grep -q '^<!-- workproof-release-summary -->$' "$RUNNER_TEMP/release-body.md" || { echo "the release body has no summary block"; exit 1; }
+          node scripts/action-release.mjs "$RUNNER_TEMP/release-body.md" "$RUNNER_TEMP/comment.md" | cmp - "$RUNNER_TEMP/release-body.md" || { echo "a second run changed the release body"; exit 1; }
   coverage:
     # Line, branch and function coverage of dist/src under Node's built-in coverage, one leg. The
     # floors in the test:coverage script are the values measured on Linux with Node 24 when this

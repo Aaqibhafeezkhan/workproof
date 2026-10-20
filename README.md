@@ -480,6 +480,23 @@ read them:
           REPORT: ${{ steps.workproof.outputs.report }}
 ```
 
+To put the summary on a release instead, run the action on the `release` event with `release: "true"`. It adds
+the headline-figures block to the release notes (replacing its own block on later runs, never touching your notes)
+and attaches `workproof-report.json` to the release. It fails on any other event rather than doing nothing, and
+like every run it needs `fetch-depth: 0`, because a shallow clone cannot produce honest figures. The block holds
+the same figures as the pull request comment: no paths, no emails, no commit messages.
+
+```yaml
+on: { release: { types: [published] } }
+permissions: { contents: write }
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - { uses: actions/checkout@v4, with: { fetch-depth: 0 } }
+      - { uses: Bubblegunn/workproof@v0, with: { author: ada@example.com, release: "true" } }
+```
+
 The `package` input runs a local npm pack tarball instead of `workproof@<version>` from the
 registry. This repository's CI uses it to run the action on the package built from the commit
 under test; leave it empty to get the released version.

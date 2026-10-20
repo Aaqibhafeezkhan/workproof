@@ -20,6 +20,10 @@ inputs:
     description: Sign an in-toto attestation of the report with Sigstore (cosign attest-blob, keyless through the workflow's OIDC identity). Needs permissions id-token write. The Fulcio certificate names this repository and the Rekor entry is public and permanent.
     required: false
     default: "false"
+  release:
+    description: On a release event, add the headline-figures summary to the release notes (one block, replaced on later runs) and attach workproof-report.json to the release. Needs permissions contents write and a checkout with fetch-depth 0. Fails on any other event, so it is never silently skipped.
+    required: false
+    default: "false"
   version:
     description: workproof version to run.
     required: false
@@ -38,6 +42,14 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Check the release input
+      if: ${{ inputs.release == 'true' && github.event_name != 'release' }}
+      shell: bash
+      env:
+        EVENT: ${{ github.event_name }}
+      run: |
+        echo "::error::release: \"true\" works only on a release event (on: release: types: [published]); this run is a $EVENT event"
+        exit 1
     - name: Run workproof
       id: run
       shell: bash
@@ -71,6 +83,20 @@ runs:
           workproof-report.intoto.json
           workproof-report.predicate.json
         if-no-files-found: error
+    - name: Add the summary to the release
+      if: ${{ inputs.release == 'true' && github.event_name == 'release' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ github.event.release.tag_name }}
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        node "$GITHUB_ACTION_PATH/scripts/action-comment.mjs" workproof-report.json > "$RUNNER_TEMP/wp-summary.md"
+        gh release view "$TAG" --repo "$REPO" --json body --jq '.body // ""' > "$RUNNER_TEMP/wp-body.md"
+        node "$GITHUB_ACTION_PATH/scripts/action-release.mjs" "$RUNNER_TEMP/wp-body.md" "$RUNNER_TEMP/wp-summary.md" > "$RUNNER_TEMP/wp-new-body.md"
+        gh release edit "$TAG" --repo "$REPO" --notes-file "$RUNNER_TEMP/wp-new-body.md"
+        gh release upload "$TAG" --repo "$REPO" --clobber workproof-report.json
     - name: Install cosign
       if: ${{ inputs.attest == 'true' }}
       uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2

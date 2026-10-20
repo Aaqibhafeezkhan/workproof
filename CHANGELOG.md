@@ -23,6 +23,12 @@ command section carries both labels, and that the limits still hold in the code.
 npm tarball and its sha256, and `packaging/homebrew/workproof.rb` is the result for 0.6.2, ready for a tap repository
 that does not exist yet. Nothing is installable through Homebrew until that tap is created.
 
+**The Action can attach a summary to a release (#12).** `release: "true"` on a `release` event adds the same
+headline-figures block the pull request comment uses to the release notes, replacing its own block on later runs
+and leaving the author's notes alone, and attaches `workproof-report.json` to the release. Any other event fails the
+first step instead of skipping silently. The script that builds the notes is tested, and CI runs it on every push; the
+`gh release` calls themselves can only be proven by the first real release that uses them.
+
 ## 0.6.2 (2026-10-14)
 
 **CI runs the Action through GitHub's self-repository reference.** The `action` job now says `uses: $/` instead of
