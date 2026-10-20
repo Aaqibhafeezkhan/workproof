@@ -169,6 +169,10 @@ a GitHub noreply login that matches your address or your name, and the same addr
 another domain. Role addresses like `dev@` and bot addresses are ignored, because sharing one
 proves nothing.
 
+Without `--emails` the line states only how many other addresses may be the same person and
+tells you to re-run with `--emails`; the reasons are fixed phrases, and no name, login or address
+is written. With `--emails` the names, public emails and reasons are listed.
+
 It is a disclosure, not a correction. The tool cannot know whether two addresses are one person,
 so it never merges them for you: pass each address to `--author`, or write a `.mailmap`, which
 `git log`, `git blame` and `git shortlog` all read as well.

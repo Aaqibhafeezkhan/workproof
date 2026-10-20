@@ -109,6 +109,19 @@ function figureLines(f: RepoReport["figures"][number]): string[] {
   }
 }
 
+type SplitRecord = NonNullable<Report["repositories"][number]["identity"]["possiblySplit"]>;
+
+/** The paragraph about addresses that may be the subject. Without --emails the record holds no names, so it states a count only. */
+function splitNotice(split: SplitRecord): string {
+  const n = split.count ?? split.names.length;
+  const reasons = split.reasons.map((r, i) => (i === 0 ? r.charAt(0).toUpperCase() + r.slice(1) : r)).join("; ");
+  const tail = "Every figure below therefore describes only the work under the identities named above. If they are the same person, re-run with each address passed to `--author`, or merge them in a `.mailmap`.";
+  if (split.names.length === 0) {
+    return `**${plural(n, "other address", "other addresses")} in this repository may be the same person and ${n === 1 ? "was" : "were"} not counted here.** ${split.hint ?? ""} Why: ${reasons}. ${tail}`;
+  }
+  return `**${plural(n, "other identity", "other identities")} in this repository look${n === 1 ? "s" : ""} like the same person and ${n === 1 ? "was" : "were"} not counted here**: ${split.names.map(isolate).join(", ")}${split.emails?.length ? ` (${split.emails.join(", ")})` : ""}. ${reasons}. ${tail}`;
+}
+
 export function renderMarkdown(report: Report, narrative?: string): string {
   const out: string[] = [
     `# Engineering report`,
@@ -122,12 +135,7 @@ export function renderMarkdown(report: Report, narrative?: string): string {
       ``,
       `HEAD \`${repo.head.slice(0, 12)}\` · fingerprint \`${repo.fingerprint.slice(0, 16)}\` · identities: ${repo.identity.names.map(isolate).join(", ")}${repo.identity.emails.length ? ` (${repo.identity.emails.join(", ")})` : ""}`,
       ``,
-      ...(repo.identity.possiblySplit
-        ? [
-            `**${plural(repo.identity.possiblySplit.names.length, "other identity", "other identities")} in this repository look${repo.identity.possiblySplit.names.length === 1 ? "s" : ""} like the same person and ${repo.identity.possiblySplit.names.length === 1 ? "was" : "were"} not counted here**: ${repo.identity.possiblySplit.names.map(isolate).join(", ")}${repo.identity.possiblySplit.emails?.length ? ` (${repo.identity.possiblySplit.emails.join(", ")})` : ""}. ${repo.identity.possiblySplit.reasons.map((r, i) => (i === 0 ? r.charAt(0).toUpperCase() + r.slice(1) : r)).join("; ")}. Every figure below therefore describes only the work under the identities named above. If they are the same person, re-run with each address passed to \`--author\`, or merge them in a \`.mailmap\`.`,
-            ``,
-          ]
-        : []),
+      ...(repo.identity.possiblySplit ? [splitNotice(repo.identity.possiblySplit), ``] : []),
       repo.excluded.enabled
         ? `excluded ${plural(repo.excluded.botCommits, "bot commit", "bot commits")} and ${plural(repo.excluded.files, "generated, vendored or lock file", "generated, vendored or lock files")} (${pct(repo.excluded.linesAddedShare)} of lines added)`
         : `exclusions off (--no-exclusions): bot commits and generated files are counted`,

@@ -279,7 +279,9 @@ async function main() {
   for (const repo of report.repositories) {
     const split = repo.identity.possiblySplit;
     if (!split) continue;
-    progress(`${repo.name}: warning, ${split.names.length} other identity in this repository looks like the same person and is not in these figures (${split.names.join(", ")}). Pass every address to --author, or merge them in a .mailmap.`);
+    const n = split.count ?? split.names.length;
+    const who = split.names.length ? ` (${split.names.join(", ")})` : ` ${split.hint ?? ""}`;
+    progress(`${repo.name}: warning, ${n} other ${n === 1 ? "address" : "addresses"} in this repository may be the same person and ${n === 1 ? "is" : "are"} not in these figures${who}. Pass every address to --author, or merge them in a .mailmap.`);
   }
   console.log(`wrote ${written.join(" and ")} in ${((Date.now() - started) / 1000).toFixed(1)}s`);
 }

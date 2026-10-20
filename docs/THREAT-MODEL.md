@@ -12,8 +12,8 @@ Two things.
 1. **A reader's decision.** Someone deciding whether to believe a number about another person's work in a
    private repository: a hiring manager, a caseworker, a client. They can see the report and nothing else.
 2. **The author's privacy.** The code, the file paths and the email addresses stay out of the report by
-   default (`src/analyse.ts`, `src/report.ts`). The local directory name is written, and two other things
-   are written that the README says are not: see Privacy defaults and Known mismatches with the README.
+   default (`src/analyse.ts`, `src/report.ts`). The local directory name is written, which the README does
+   not promise to hide: see Privacy defaults and Known mismatches with the README.
 
 The tool is not a productivity metric and does not rank people. It reports what survived and what was
 touched, with the git command and the limits under every figure.
@@ -157,13 +157,11 @@ file, in the cases listed above.
   counts.
 - The repository name field is the local directory name and is not hidden (`test/threat-model.test.ts`). A
   directory called after the client is a disclosure; rename it before running.
-- The possible-split record (`identity.possiblySplit`) writes the names of other identities in the repository
-  that look like the subject, whether or not they are the same person. Its reason text can contain a GitHub
-  login taken from a noreply address, for example `the GitHub login "adalovelace" matches yours`. This happens
-  without `--emails`, so a login can reach the report even though the README says noreply addresses are never
-  written. It reproduces with `possibleSplits` (`src/figures/identity.ts`): the subject's identity with the
-  name "Ada Lovelace" and the email `ada.lovelace@example.com`, and a commit by `99+adalovelace@users.noreply.github.com`
-  under the name "A. L." returns a reason containing `"adalovelace"`.
+- The possible-split record (`identity.possiblySplit`) is written without names, logins or addresses unless
+  `--emails` is passed: it carries a count of other addresses that may be the subject, a fixed hint and fixed
+  category strings (`SPLIT_CATEGORY` in `src/figures/identity.ts`). With `--emails` it also lists those
+  identities' names, public emails and reasons that quote a login or address name. `test/threat-model.test.ts`
+  checks both modes.
 - The fingerprint key, if it is shared along with the report.
 - Whether the employer, client or agreement allows these figures to be published. The tool cannot check that;
   check the agreement first.
@@ -194,17 +192,11 @@ seed. The narrative can say anything; the reader must treat it as unverified, wh
 
 ## Known mismatches with the README
 
-The README states three things the code does not do. This page follows the code. The README is not edited
+The README states one thing the code does not do. This page follows the code. The README is not edited
 here, and each quoted phrase below is checked by `test/threat-model.test.ts`: if the README changes, that test
 fails until this section is brought up to date.
 
-1. README, Privacy: "Non-subject names are never written." `identity.possiblySplit.names` writes the names of
-   other identities in the repository that look like the subject, whether or not they are the same person
-   (`possibleSplits` in `src/figures/identity.ts`; `analyseRepo` in `src/analyse.ts`).
-2. README, Privacy: GitHub noreply addresses "are never written, with or without the flag". Without
-   `--emails`, the possible-split reason can contain a login taken from a noreply address, for example
-   `the GitHub login "adalovelace" matches yours` (same functions). The login reaches the JSON and the Markdown.
-3. README, GitHub Action section: "`attest: "true"` signs the same statement keylessly with Sigstore." The
+1. README, GitHub Action section: "`attest: "true"` signs the same statement keylessly with Sigstore." The
    Action runs `cosign attest-blob workproof-report.json` with the predicate file as its predicate. The
    in-toto statement that `attest` writes is not the signed object, and the subject is the digest of the
    report file (`action.yml`).

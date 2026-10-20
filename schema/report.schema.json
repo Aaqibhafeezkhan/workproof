@@ -90,6 +90,13 @@
               "possiblySplit": {
                 "type": "object",
                 "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "hint": {
+                    "type": "string"
+                  },
                   "names": {
                     "type": "array",
                     "items": {

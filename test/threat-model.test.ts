@@ -1,10 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFile, access, rm } from "node:fs/promises";
+import { readFile, writeFile, mkdtemp, access, rm } from "node:fs/promises";
 import { basename, join } from "node:path";
+import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
 import { makeRepo } from "./fixture.js";
-import { analyseRepo, buildReport, checkReport, hashOf, narrate, predicateFor } from "../src/index.js";
+import { analyseRepo, buildReport, checkReport, hashOf, narrate, predicateFor, renderMarkdown } from "../src/index.js";
 import type { Report } from "../src/index.js";
 import { possibleSplits } from "../src/figures/identity.js";
 
@@ -121,15 +122,64 @@ const OTHER_NOREPLY = "99+adalovelace@users.noreply.github.com";
 const OTHER_NAME = "A. L.";
 const OTHER_LOGIN = OTHER_NOREPLY.split("@")[0]!.replace(/^\d+\+/, "");
 
-test("privacy: a split identity's name and noreply login reach the report without --emails", () => {
+// A repository where two other addresses share the subject's GitHub login. The names and logins are fixtures.
+const SPLIT_SUBJECT = "7+adalovelace@users.noreply.github.com";
+const SPLIT_OTHERS = [
+  { name: "Quentin Zed", email: "99+adalovelace@users.noreply.github.com" },
+  { name: "Rhea Vox", email: "adalovelace@corp.example" },
+];
+
+async function makeSplitRepo(): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), "workproof-split-"));
+  const commit = (who: { name: string; email: string }, date: string, file: string) => {
+    const env = { ...process.env, GIT_AUTHOR_NAME: who.name, GIT_AUTHOR_EMAIL: who.email, GIT_COMMITTER_NAME: who.name, GIT_COMMITTER_EMAIL: who.email, GIT_AUTHOR_DATE: date, GIT_COMMITTER_DATE: date };
+    execFileSync("git", ["add", "."], { cwd: dir, env });
+    execFileSync("git", ["commit", "-q", "-m", file], { cwd: dir, env });
+  };
+  execFileSync("git", ["init", "-q", "-b", "main"], { cwd: dir });
+  const mine = { name: "Ada Lovelace", email: SPLIT_SUBJECT };
+  for (const [i, who] of [mine, ...SPLIT_OTHERS].entries()) {
+    await writeFile(join(dir, `f${i}.ts`), Array.from({ length: 12 }, (_, j) => `line ${j} ${i}`).join("\n") + "\n");
+    commit(who, `2026-01-${String(5 + i * 7).padStart(2, "0")}T10:00:00Z`, `c${i}`);
+  }
+  return dir;
+}
+
+test("privacy: other identities' names and logins stay out of the report without --emails", async () => {
+  const dir = await makeSplitRepo();
+  try {
+    const base = { ...params, author: [SPLIT_SUBJECT], sample: 1 };
+    const quiet = { ...base, emails: false };
+    const report = buildReport([await analyseRepo(dir, quiet)], quiet, meta);
+    const split = report.repositories[0]!.identity.possiblySplit;
+    assert.ok(split, "the suspicion is still disclosed");
+    assert.equal(split.count, SPLIT_OTHERS.length, "the count of other addresses is written");
+    assert.match(split.hint ?? "", /--emails/, "a fixed hint points at --emails");
+    const text = JSON.stringify(report) + "\n" + renderMarkdown(report);
+    for (const leak of ["Quentin Zed", "Rhea Vox", "adalovelace", "corp.example"]) {
+      assert.ok(!text.includes(leak), `"${leak}" must not be written without --emails`);
+    }
+    assert.ok(checkReport(JSON.parse(JSON.stringify(report))).ok, "the report still validates against the schema");
+
+    const loud = { ...base, emails: true };
+    const full = buildReport([await analyseRepo(dir, loud)], loud, meta);
+    const fullText = JSON.stringify(full) + "\n" + renderMarkdown(full);
+    assert.ok(fullText.includes("Quentin Zed") && fullText.includes("Rhea Vox"), "--emails keeps the names");
+    assert.ok(fullText.includes("adalovelace"), "--emails keeps the login in the reasons");
+    assert.ok(checkReport(JSON.parse(JSON.stringify(full))).ok);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("privacy: possibleSplits tags every record with a fixed category", () => {
   const commits = [
     { name: "Ada Lovelace", email: "ada.lovelace@example.com" },
-    { name: OTHER_NAME, email: OTHER_NOREPLY },
+    { name: "A. L.", email: "99+adalovelace@users.noreply.github.com" },
   ];
   const splits = possibleSplits(commits, { emails: ["ada.lovelace@example.com"], names: ["Ada Lovelace"] });
   assert.equal(splits.length, 1);
-  assert.equal(splits[0]!.name, OTHER_NAME, "the other identity's name is in the record");
-  assert.ok(splits[0]!.reason.includes(OTHER_LOGIN), "the reason carries the login from the noreply address");
+  assert.equal(splits[0]!.category, "GitHub login matches");
 });
 
 test("predicate: the in-toto predicate carries the subject's author names", async () => {
@@ -193,7 +243,7 @@ test("known mismatches: the section exists and each quoted README sentence is st
   const body = s.get("Known mismatches with the README");
   assert.ok(body !== undefined, "the Known mismatches section exists");
   const readme = (await readFile(join(root, "README.md"), "utf8")).replace(/\s+/g, " ");
-  for (const quote of ["Non-subject names are never written.", "are never written, with or without the flag", "signs the same statement keylessly with"]) {
+  for (const quote of ["signs the same statement keylessly with"]) {
     assert.ok(readme.includes(quote), `README no longer says "${quote}": update the section`);
     assert.ok(body.includes(quote), `the section does not quote "${quote}"`);
   }

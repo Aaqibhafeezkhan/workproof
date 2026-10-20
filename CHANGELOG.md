@@ -2,6 +2,14 @@
 
 ## 0.7.0 (unreleased)
 
+**Privacy fix: other people's names and logins no longer reach the report without `--emails`.** The "may be the same
+person" record used to write the commit names of the other addresses, and reasons that quoted a GitHub login or an
+address name taken from their email, even without `--emails`, which contradicted the README. Without `--emails` it now
+holds only a count (`identity.possiblySplit.count`), a fixed hint (`hint`) and fixed reason phrases such as "GitHub
+login matches", in the JSON, the Markdown and the stderr warning. With `--emails` the detail is unchanged. The two new
+fields are optional, so `schemaVersion` stays 2. Reports made before this change may still contain those names; make
+them again before sharing.
+
 **A colleague can countersign a report (#19).** `workproof countersign report.json --key <ssh-key>` is run by a
 second person in their own clone of the same repository. It recomputes every figure with `verify`'s own code and
 refuses, signing nothing, unless the report checks, the keyed fingerprint matches, the clone is at the report's commit

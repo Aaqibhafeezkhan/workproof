@@ -9,7 +9,7 @@ import { isBot, excludedSet } from "./exclusions.js";
 // surviving-lines ships plain ESM JavaScript without type declarations.
 // @ts-ignore
 import { globToRegExp } from "surviving-lines/bin/surviving-lines.js";
-import { resolveIdentity, possibleSplits } from "./figures/identity.js";
+import { resolveIdentity, possibleSplits, SPLIT_HINT } from "./figures/identity.js";
 import { tenure, commitShare } from "./figures/commits.js";
 import { cadence } from "./figures/cadence.js";
 import { footprint, testsAndDocs } from "./figures/footprint.js";
@@ -59,7 +59,7 @@ export interface RepoReport {
     names: string[];
     count: number;
     /** Addresses here that look like the subject and were not counted as them. */
-    possiblySplit?: { names: string[]; emails?: string[]; reasons: string[] };
+    possiblySplit?: { count?: number; hint?: string; names: string[]; emails?: string[]; reasons: string[] };
   };
   /** What the figures were computed with, so a verifier can tell a drift from an edit. */
   environment: { git: string; blame: string[]; ignoreRevs: string | null; seed: string };
@@ -196,11 +196,21 @@ export async function analyseRepo(cwd: string, params: Params, hooks: AnalyseHoo
       count: id.emails.length,
       ...(splits.length
         ? {
-            possiblySplit: {
-              names: [...new Set(splits.map((sp) => sp.name))],
-              ...(params.emails ? { emails: [...new Set(splits.map((sp) => publicEmail(sp.email)))] } : {}),
-              reasons: [...new Set(splits.map((sp) => sp.reason))],
-            },
+            // Without --emails the record is a count, a fixed hint and fixed category strings: no
+            // other identity's name, and nothing derived from its address (login, local part).
+            possiblySplit: params.emails
+              ? {
+                  count: splits.length,
+                  names: [...new Set(splits.map((sp) => sp.name))],
+                  emails: [...new Set(splits.map((sp) => publicEmail(sp.email)))],
+                  reasons: [...new Set(splits.map((sp) => sp.reason))],
+                }
+              : {
+                  count: splits.length,
+                  hint: SPLIT_HINT,
+                  names: [],
+                  reasons: [...new Set(splits.map((sp) => sp.category))],
+                },
           }
         : {}),
     },

@@ -88,6 +88,20 @@ const localPart = (mail: string) => mail.split("@")[0]!.replace(/^\d+\+/, "");
 const loose = (s: string) => foldIdentity(s).replace(/[\s._-]/g, "");
 
 /**
+ * Fixed strings that say why an address was flagged, with nothing taken from the other
+ * identity. These are what a report written without `--emails` carries, so none of them may
+ * be built from a name, login, local part or address.
+ */
+export const SPLIT_HINT = "Re-run with --emails to see which addresses.";
+
+export const SPLIT_CATEGORY = {
+  sameName: "same name on another address",
+  login: "GitHub login matches",
+  local: "address name matches",
+  otherDomain: "same address name on another domain",
+} as const;
+
+/**
  * Addresses in this repository that look like the subject but were not counted as them.
  *
  * A person who commits from a laptop and a work machine is two authors to git, so a report
@@ -99,34 +113,39 @@ const loose = (s: string) => foldIdentity(s).replace(/[\s._-]/g, "");
 export function possibleSplits(
   commits: { name: string; email: string }[],
   identity: { emails: string[]; names: string[] },
-): { name: string; email: string; reason: string }[] {
+): { name: string; email: string; reason: string; category: string }[] {
   const mine = new Set(identity.emails.map(foldIdentity));
   const myNames = identity.names.map(foldIdentity);
   const myLogins = identity.emails.map(githubLogin).filter((l): l is string => l !== null);
   const myLocals = identity.emails.map(localPart);
 
   const seen = new Set<string>();
-  const out: { name: string; email: string; reason: string }[] = [];
+  const out: { name: string; email: string; reason: string; category: string }[] = [];
   for (const c of commits) {
     const email = c.email;
     if (mine.has(foldIdentity(email)) || seen.has(foldIdentity(email)) || isBotIdentity(email)) continue;
     let reason = "";
+    let category = "";
     if (myNames.includes(foldIdentity(c.name))) {
       reason = `the same name, "${c.name}", on another address`;
+      category = SPLIT_CATEGORY.sameName;
     } else {
       const theirLogin = githubLogin(email);
       const theirLocal = localPart(email);
       if (theirLogin && (myLocals.some((l) => loose(l) === loose(theirLogin)) || myNames.some((n) => loose(n) === loose(theirLogin)))) {
         reason = `the GitHub login "${theirLogin}" matches yours`;
+        category = SPLIT_CATEGORY.login;
       } else if (myLogins.some((l) => loose(l) === loose(theirLocal) || myNames.some((n) => loose(n) === loose(theirLocal)))) {
         reason = `the address name "${theirLocal}" matches your GitHub login`;
+        category = SPLIT_CATEGORY.local;
       } else if (!theirLogin && myLocals.some((l) => l === theirLocal && l.length >= 3 && !GENERIC_LOCAL.has(l))) {
         reason = `the same address name, "${theirLocal}", on another domain`;
+        category = SPLIT_CATEGORY.otherDomain;
       }
     }
     if (reason) {
       seen.add(foldIdentity(email));
-      out.push({ name: c.name, email, reason });
+      out.push({ name: c.name, email, reason, category });
     }
   }
   return out;

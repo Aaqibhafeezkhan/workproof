@@ -38,6 +38,8 @@ function checkRepository(problems: Problem[], path: string, r: unknown): void {
       const ps = id.possiblySplit as Record<string, unknown>;
       expect(problems, `${path}.identity.possiblySplit.names`, Array.isArray(ps.names), "array");
       expect(problems, `${path}.identity.possiblySplit.reasons`, Array.isArray(ps.reasons), "array");
+      if (ps.count !== undefined) expect(problems, `${path}.identity.possiblySplit.count`, typeof ps.count === "number", "number");
+      if (ps.hint !== undefined) expect(problems, `${path}.identity.possiblySplit.hint`, typeof ps.hint === "string", "string");
       if (ps.emails !== undefined) expect(problems, `${path}.identity.possiblySplit.emails`, Array.isArray(ps.emails), "array");
     }
   }
