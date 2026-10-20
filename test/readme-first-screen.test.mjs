@@ -87,3 +87,19 @@ test("headings appear in the planned order and none was lost", () => {
     "Development",
   ]);
 });
+
+const PAIN_TR = "> Yaptığım işin çoğu özel repolarda. Orada ne yaptığımı, kodu göstermeden kimseye gösteremiyorum.";
+const CATEGORY = "workproof is a command-line tool that turns a private git repository into a report of one author's work, with a hash a reader can check and no source code in it.";
+
+test("README.tr.md opens with the Turkish pain sentence, carries the category sentence and the recording, and has no badge or raw image link", () => {
+  const t = read("README.tr.md");
+  const first = t.split("\n").find((l) => l.trim() !== "" && !l.trim().startsWith("<"));
+  assert.equal(first, PAIN_TR);
+  assert.ok(t.includes(CATEGORY), "category sentence missing");
+  assert.ok(t.includes("](docs/demo.gif)"), "recording missing");
+  assert.ok(!/img\.shields\.io\/github\/stars/.test(t) && !/img\.shields\.io\/npm\/(dm|dw|dt|dy)\//.test(t), "stars or downloads badge");
+  // The image itself must not be served from raw.githubusercontent.com; a badge URL that merely names it as a query value is a different thing.
+  const images = [...t.matchAll(/<img[^>]*\ssrc="([^"]*)"|!\[[^\]]*\]\(([^)\s]*)/g)].map((m) => m[1] ?? m[2]);
+  assert.ok(images.length > 0);
+  for (const i of images) assert.ok(!/^https?:\/\/raw\.githubusercontent\.com/.test(i), `raw image link: ${i}`);
+});

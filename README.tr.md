@@ -19,7 +19,7 @@ Bu komut `workproof-report.md` dosyasını yazar (özgeçmişe, portfolyoya ya d
 
 ![Terminal kaydı: workproof raporu yazar, check hash ok der, verify tüm figürlerin yeniden hesaplandığını söyler, sonra iki paylaşım gösterilir](docs/demo.gif)
 
-Bu bir verimlilik ölçütü değildir ve insanları sıralamaz. Hayatta kalanı ve dokunulanı ölçer; her figürün altında onun arkasındaki git komutunu ve neyi gösteremediğini yazar. Yalnızca JSON dosyası olan biri `workproof check` komutunu çalıştırıp dosyanın yazıldıktan sonra değiştirilip değiştirilmediğini öğrenebilir. Bu, deponun geçmişinin gerçek olduğunu kanıtlamaz ([tehdit modeli](docs/THREAT-MODEL.md)). Adaylar aracı çalıştırır; işe alan kişi için [README.md#for-hiring-managers](README.md#for-hiring-managers) bölümüne bakın.
+Bu bir verimlilik ölçütü değildir ve insanları sıralamaz. Hayatta kalanı ve dokunulanı ölçer; her figürün altında onun arkasındaki git komutunu ve neyi gösteremediğini yazar. Yalnızca JSON dosyası olan biri `workproof check` komutunu çalıştırıp dosyanın yazıldıktan sonra değiştirilip değiştirilmediğini öğrenebilir. Bu, deponun geçmişinin gerçek olduğunu kanıtlamaz ([tehdit modeli](docs/THREAT-MODEL.md)). Adaylar aracı çalıştırır; işe alan kişi için [İşe alanlar için](#i%CC%87%C5%9Fe-alanlar-i%C3%A7in) bölümüne bakın.
 
 <p align="center">
   <img src="https://img.shields.io/npm/v/workproof?style=flat-square&color=111111&label=npm" alt="npm">
@@ -126,8 +126,8 @@ median 166 lines, 90th percentile 9,234, 6 commits over 10,000 lines
 
 İlk satırı ve iki payı birlikte okuyun. Altmış dört bot commit'i daha hiçbir şey
 sayılmadan paydadan çıktı; bu, aynı kişinin eski sürümde %24,1 görünen commit payını
-%30,5'e taşıdı. Penceresindeki insan commit'lerinin %30,5'ini ve hâlâ yaşayan satırların
-%70,6'sını yazmış. Tek başına commit sayısı onu yetmiş bir katkıcıdan biri diye
+%30,2'e taşıdı. Penceresindeki insan commit'lerinin %30,2'ini ve hâlâ yaşayan satırların
+%70,6'sını yazmış. Tek başına commit sayısı onu yetmiş üç katkıcıdan biri diye
 adlandırırdı. Bu boşluk, iki yönde de, bir raporun birinin işi hakkında söyleyebileceği en
 dürüst şeydir.
 

@@ -24,7 +24,7 @@ Run `npx workproof` inside the repository. Put `workproof-report.md` in your por
 
 ## How is workproof different from git-fame and gitinspector?
 
-Both print per-author numbers from git. [COMPARISON.md](COMPARISON.md) holds a generated comparison: each tool was run on the same fixture repository on 2026-10-20, once with its defaults and once tuned by hand, with the tool versions pinned. workproof matches `git blame` by default, removes bot commits before counting, prints no email address by default, and has `check`, `verify`, `attest` and `countersign` for its own reports. git-fame and gitinspector write CSV, HTML or XML and workproof does not; git-fame, git-who and git-quick-stats run as git subcommands and workproof does not. The page lists every row where workproof is behind.
+Both print per-author numbers from git. [COMPARISON.md](COMPARISON.md) holds a generated comparison: each tool was run on the same fixture repositories on 2026-10-20, once with its defaults and once tuned by hand, with the tool versions pinned. workproof matches `git blame` by default, removes bot commits before counting, prints no email address by default, and has `check`, `verify`, `attest` and `countersign` for its own reports. git-fame and gitinspector write CSV, HTML or XML and workproof does not; git-fame, git-who and git-quick-stats run as git subcommands and workproof does not. The page lists every row where workproof is behind.
 
 ## Does workproof put my private commits on my GitHub contribution graph?
 
