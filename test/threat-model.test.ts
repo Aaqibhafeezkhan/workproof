@@ -2,9 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, access, rm } from "node:fs/promises";
 import { basename, join } from "node:path";
+import { execFileSync } from "node:child_process";
 import { makeRepo } from "./fixture.js";
-import { analyseRepo, buildReport, checkReport, hashOf } from "../src/index.js";
+import { analyseRepo, buildReport, checkReport, hashOf, narrate, predicateFor } from "../src/index.js";
 import type { Report } from "../src/index.js";
+import { possibleSplits } from "../src/figures/identity.js";
 
 const root = process.cwd();
 const doc = () => readFile(join(root, "docs/THREAT-MODEL.md"), "utf8");
@@ -111,5 +113,88 @@ test("limit: the repository name in the report is the local directory name, whic
     assert.equal(report.repositories[0]!.name, basename(dir));
   } finally {
     await rm(dir, { recursive: true, force: true });
+  }
+});
+
+// The noreply address and the name are fixtures; the login the report should carry is derived from the address.
+const OTHER_NOREPLY = "99+adalovelace@users.noreply.github.com";
+const OTHER_NAME = "A. L.";
+const OTHER_LOGIN = OTHER_NOREPLY.split("@")[0]!.replace(/^\d+\+/, "");
+
+test("privacy: a split identity's name and noreply login reach the report without --emails", () => {
+  const commits = [
+    { name: "Ada Lovelace", email: "ada.lovelace@example.com" },
+    { name: OTHER_NAME, email: OTHER_NOREPLY },
+  ];
+  const splits = possibleSplits(commits, { emails: ["ada.lovelace@example.com"], names: ["Ada Lovelace"] });
+  assert.equal(splits.length, 1);
+  assert.equal(splits[0]!.name, OTHER_NAME, "the other identity's name is in the record");
+  assert.ok(splits[0]!.reason.includes(OTHER_LOGIN), "the reason carries the login from the noreply address");
+});
+
+test("predicate: the in-toto predicate carries the subject's author names", async () => {
+  const dir = await makeRepo();
+  try {
+    const report = buildReport([await analyseRepo(dir, params)], params, meta);
+    const names = predicateFor(report).repositories[0]!.identity.names;
+    assert.deepEqual(names, report.repositories[0]!.identity.names);
+    assert.ok(names.length > 0, "at least one author name is written");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("narration: the request carries the figure values, including the blame sample seed, and no email", async () => {
+  const seed = "seed-for-narration-test";
+  const dir = await makeRepo();
+  try {
+    const p = { ...params, seed, emails: false };
+    const report = buildReport([await analyseRepo(dir, p)], p, meta);
+    let body = "";
+    const fakeFetch = (async (_url: string, init: { body: string }) => {
+      body = init.body;
+      return new Response(JSON.stringify({ choices: [{ message: { content: "ok" } }] }), { status: 200 });
+    }) as unknown as typeof fetch;
+    await narrate(report, { url: "http://127.0.0.1:1/v1", key: "k", model: "m" }, fakeFetch);
+    assert.ok(body.includes("survivingLines"), "figure ids are sent");
+    assert.ok(body.includes(seed), "the sample seed is sent, as the threat model says");
+    assert.ok(!body.includes("ada@example.com"), "the author's email is not sent");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("verify without a fingerprint key says the fingerprint was not compared", async () => {
+  const dir = await makeRepo();
+  try {
+    const cli = join(process.cwd(), "dist/src/cli.js");
+    const out = join(dir, "r");
+    execFileSync("node", [cli, "--repo", dir, "--author", "ada@example.com", "--out", out], { encoding: "utf8", stdio: ["ignore", "ignore", "ignore"] });
+    const v = execFileSync("node", [cli, "verify", `${out}.json`, "--repo", dir], { encoding: "utf8" });
+    assert.match(v, /fingerprint not compared/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("the Action's Sigstore step signs the report file with the predicate, not the in-toto statement", async () => {
+  const action = await readFile(join(root, "action.yml"), "utf8");
+  const start = action.indexOf("- name: Attest the report with Sigstore");
+  const end = action.indexOf("- name: Comment on the pull request");
+  assert.ok(start >= 0 && end > start, "the Sigstore step is found in action.yml");
+  const step = action.slice(start, end);
+  assert.ok(step.includes("cosign attest-blob workproof-report.json"), "cosign attests the report file");
+  assert.ok(step.includes("--predicate workproof-report.predicate.json"), "the predicate file is the predicate");
+  assert.ok(!step.includes("intoto"), "the in-toto statement is not the signed object");
+});
+
+test("known mismatches: the section exists and each quoted README sentence is still in the README", async () => {
+  const s = sections(await doc());
+  const body = s.get("Known mismatches with the README");
+  assert.ok(body !== undefined, "the Known mismatches section exists");
+  const readme = (await readFile(join(root, "README.md"), "utf8")).replace(/\s+/g, " ");
+  for (const quote of ["Non-subject names are never written.", "are never written, with or without the flag", "signs the same statement keylessly with"]) {
+    assert.ok(readme.includes(quote), `README no longer says "${quote}": update the section`);
+    assert.ok(body.includes(quote), `the section does not quote "${quote}"`);
   }
 });

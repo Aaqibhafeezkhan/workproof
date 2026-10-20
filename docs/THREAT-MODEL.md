@@ -11,9 +11,9 @@ Two things.
 
 1. **A reader's decision.** Someone deciding whether to believe a number about another person's work in a
    private repository: a hiring manager, a caseworker, a client. They can see the report and nothing else.
-2. **The author's privacy.** The code, the file paths, the email addresses and the identity of the
-   repository stay out of the report by default (`src/analyse.ts`, `src/report.ts`). The defaults have
-   gaps, listed under Privacy defaults.
+2. **The author's privacy.** The code, the file paths and the email addresses stay out of the report by
+   default (`src/analyse.ts`, `src/report.ts`). The local directory name is written, and two other things
+   are written that the README says are not: see Privacy defaults and Known mismatches with the README.
 
 The tool is not a productivity metric and does not rank people. It reports what survived and what was
 touched, with the git command and the limits under every figure.
@@ -144,7 +144,8 @@ code always writes `fingerprintKeyed: true`; the unkeyed form is read only so th
 
 By default the report contains no code content, no file paths (directory paths become
 `(hidden; run with --paths)`), no email addresses (the `--author` you typed is stored as `(email hidden)`),
-and no GitHub noreply address (`src/analyse.ts`, `src/report.ts`, `src/figures/identity.ts`).
+and, except as listed below, no GitHub noreply address (`src/analyse.ts`, `src/report.ts`,
+`src/figures/identity.ts`).
 
 **Protects against.** A casual reader, a search engine or a scraper learning code, paths or addresses from the
 file, in the cases listed above.
@@ -191,9 +192,26 @@ outside the hash.
 **Does not protect against.** The model provider keeping or logging the figures, the repository name and the
 seed. The narrative can say anything; the reader must treat it as unverified, which the heading says.
 
+## Known mismatches with the README
+
+The README states three things the code does not do. This page follows the code. The README is not edited
+here, and each quoted phrase below is checked by `test/threat-model.test.ts`: if the README changes, that test
+fails until this section is brought up to date.
+
+1. README, Privacy: "Non-subject names are never written." `identity.possiblySplit.names` writes the names of
+   other identities in the repository that look like the subject, whether or not they are the same person
+   (`possibleSplits` in `src/figures/identity.ts`; `analyseRepo` in `src/analyse.ts`).
+2. README, Privacy: GitHub noreply addresses "are never written, with or without the flag". Without
+   `--emails`, the possible-split reason can contain a login taken from a noreply address, for example
+   `the GitHub login "adalovelace" matches yours` (same functions). The login reaches the JSON and the Markdown.
+3. README, GitHub Action section: "`attest: "true"` signs the same statement keylessly with Sigstore." The
+   Action runs `cosign attest-blob workproof-report.json` with the predicate file as its predicate. The
+   in-toto statement that `attest` writes is not the signed object, and the subject is the digest of the
+   report file (`action.yml`).
+
 ## Attacks nothing here stops
 
-None of the four commands does protect against these. They are listed so a reader does not assume otherwise.
+None of the four commands protects against these. They are listed so a reader does not assume otherwise.
 
 - A repository fabricated to flatter, with authors and dates set by script. Every command passes on it.
 - A history rewritten before the report was made.
