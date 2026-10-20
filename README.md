@@ -335,9 +335,11 @@ computed at HEAD, and HEAD moves; `verify` prints the HEAD line first for that r
 What each command proves, and what none of them protects against, is written down in
 [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md).
 
-In the GitHub Action, `attest: "true"` signs the same statement keylessly with
+In the GitHub Action, `attest: "true"` signs the report file keylessly with
 [Sigstore](https://www.sigstore.dev): cosign is installed from a SHA-pinned action and
-`cosign attest-blob` writes `workproof-report.sigstore.json`. A reader verifies it with:
+`cosign attest-blob workproof-report.json` writes `workproof-report.sigstore.json`, using
+the predicate file as its predicate. The signed object is the report file, not the in-toto
+statement that `workproof attest` writes. A reader verifies it with:
 
 ```
 cosign verify-blob-attestation workproof-report.json \
@@ -382,7 +384,8 @@ runs the attest step, so the private repository's name never reaches the log.
 
 ```
 workproof [options] [--repo <dir>]...
-workproof check <report.json>
+workproof check <report.json> [--countersign <file.dsse.json>]... [--allowed-signers <file>]
+workproof countersign <report.json> --key <ssh-key> [--repo <dir>] [--fingerprint-key <hex>] [--as <label>]
 workproof verify <report.json> [--repo <dir>]... [--fingerprint-key <hex>]
 workproof attest <report.json> [--local <ssh-key>]
 

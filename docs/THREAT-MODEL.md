@@ -192,14 +192,7 @@ seed. The narrative can say anything; the reader must treat it as unverified, wh
 
 ## Known mismatches with the README
 
-The README states one thing the code does not do. This page follows the code. The README is not edited
-here, and each quoted phrase below is checked by `test/threat-model.test.ts`: if the README changes, that test
-fails until this section is brought up to date.
-
-1. README, GitHub Action section: "`attest: "true"` signs the same statement keylessly with Sigstore." The
-   Action runs `cosign attest-blob workproof-report.json` with the predicate file as its predicate. The
-   in-toto statement that `attest` writes is not the signed object, and the subject is the digest of the
-   report file (`action.yml`).
+The README and the code agree on everything this page checks. An earlier README said the Action signs "the same statement" as `workproof attest`; it now says the Action signs the report file with `cosign attest-blob`, which is what `action.yml` does. `test/readme-facts.test.mjs` fails if that sentence returns. When the README and the code disagree again, list the disagreement here, and keep the phrase from the README in the entry so a test can find it.
 
 ## Attacks nothing here stops
 

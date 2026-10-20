@@ -238,13 +238,11 @@ test("the Action's Sigstore step signs the report file with the predicate, not t
   assert.ok(!step.includes("intoto"), "the in-toto statement is not the signed object");
 });
 
-test("known mismatches: the section exists and each quoted README sentence is still in the README", async () => {
+test("known mismatches: the section exists and says there are none while the README and the code agree", async () => {
   const s = sections(await doc());
   const body = s.get("Known mismatches with the README");
   assert.ok(body !== undefined, "the Known mismatches section exists");
   const readme = (await readFile(join(root, "README.md"), "utf8")).replace(/\s+/g, " ");
-  for (const quote of ["signs the same statement keylessly with"]) {
-    assert.ok(readme.includes(quote), `README no longer says "${quote}": update the section`);
-    assert.ok(body.includes(quote), `the section does not quote "${quote}"`);
-  }
+  assert.ok(!readme.includes("signs the same statement keylessly with"), "the README sentence this section once listed has returned: list it again");
+  assert.ok(body.replace(/\s+/g, " ").includes("The README and the code agree on everything this page checks."));
 });
