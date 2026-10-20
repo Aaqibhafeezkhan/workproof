@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT, pins } from "../bench/comparison/fetch.mjs";
 import { CLAIMABLE } from "../bench/comparison/rows.mjs";
-import { renderComparison } from "../bench/comparison/render.mjs";
+import { renderComparison, ROW_NOTES } from "../bench/comparison/render.mjs";
 
 const results = () => JSON.parse(readFileSync(join(ROOT, "bench/comparison/results.json"), "utf8"));
 const page = () => readFileSync(join(ROOT, "docs/COMPARISON.md"), "utf8");
@@ -46,6 +46,11 @@ test("only rows workproof wins or ties are listed as claimable", () => {
       assert.equal(claimable.includes(line), CLAIMABLE.includes(res.verdict), `${line}: ${res.verdict}`);
     }
   }
+});
+
+test("every row note names a row that exists in results.json", () => {
+  const ids = new Set(results().rows.map((row) => row.id));
+  for (const key of Object.keys(ROW_NOTES)) assert.ok(ids.has(key), `row note "${key}" matches no row id`);
 });
 
 test("the page has no em dash", () => {

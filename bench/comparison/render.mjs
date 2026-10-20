@@ -12,9 +12,9 @@ const esc = (s) => String(s).replace(/\|/g, "\\|");
 
 // Reading notes for rows whose raw cell text could be misread. They describe what a row measures,
 // and they stay on the page next to the table they explain.
-const ROW_NOTES = {
+export const ROW_NOTES = {
   generatedExcluded:
-    "gitinspector's total never matches the expected total in these runs. The row records that mismatch. It does not show that gitinspector cannot exclude generated files.",
+    "gitinspector's default total equals the expected total only by coincidence: generated lines are still counted in that run. Its tuned run excludes them and does not equal the expected total either. So the row never passes for gitinspector. It does not show that gitinspector cannot exclude generated files.",
 };
 
 const MEASUREMENT_NOTES = [

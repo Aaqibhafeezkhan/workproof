@@ -38,7 +38,7 @@ Every tool is run twice on the same repository: once with its defaults, and once
 | git-fame | fail: 59 lines in total (expected 31) | pass: 31 lines in total (expected 31) | tie |
 | gitinspector | fail: 31 lines in total (expected 31); a coincidence: the generated or lock-file lines are counted in this run | fail: 23 lines in total (expected 31) | ours ahead |
 
-gitinspector's total never matches the expected total in these runs. The row records that mismatch. It does not show that gitinspector cannot exclude generated files.
+gitinspector's default total equals the expected total only by coincidence: generated lines are still counted in that run. Its tuned run excludes them and does not equal the expected total either. So the row never passes for gitinspector. It does not show that gitinspector cannot exclude generated files.
 
 ### A bot is not listed as an author
 
