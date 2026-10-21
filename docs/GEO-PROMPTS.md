@@ -17,3 +17,12 @@ What to read in each answer:
 
 | date | model | prompt number | workproof named | what the answer said |
 |---|---|---|---|---|
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 1 | no | no tool named |
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 2 | no | Sigstore mentioned for signing; no report tool named |
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 3 | no | recommends gitinspector |
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 4 | no | no tool named |
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 5 | yes | describes workproof on npm as an independent MIT CLI, no affiliation with TalentProof found; quotes version 0.5.0 (stale; 0.7.0 is current) |
+
+## Notes on the 2026-10-21 round
+
+Recorded by Claude in Chrome before launch. Only whether the name appears, links to the project, and the other tools the answer names (found by a scan for known names) were kept; the full answer text was not saved. Perplexity (signed out) answered the first ten questions across the repositories and then showed a sign-up wall, so the rest went to ChatGPT in a temporary chat with no memory. Ask the 14-day round in the same assistant per prompt, or the comparison is not like for like.
