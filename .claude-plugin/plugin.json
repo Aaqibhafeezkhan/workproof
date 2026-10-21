@@ -1,0 +1,14 @@
+{
+  "name": "workproof",
+  "version": "0.7.0",
+  "description": "A skill that makes Claude Code run workproof to produce a verifiable engineering report from a git repository, including a private one, with a hash and no source code.",
+  "author": {
+    "name": "Efe Genc",
+    "url": "https://efe-genc-portfolio.vercel.app"
+  },
+  "homepage": "https://github.com/Bubblegunn/workproof",
+  "repository": "https://github.com/Bubblegunn/workproof",
+  "license": "MIT",
+  "keywords": ["engineering-report","git","verifiable","private-repo","portfolio","skills"],
+  "skills": "./skills"
+}

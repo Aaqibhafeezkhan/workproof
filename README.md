@@ -28,6 +28,21 @@ It is not a productivity metric and does not rank people. It reports what surviv
   <a href="https://www.bestpractices.dev/projects/15493"><img src="https://img.shields.io/cii/level/15493?style=flat-square&color=111111&label=openssf%20best%20practices" alt="OpenSSF Best Practices"></a>
 </p>
 
+### As a Claude Code plugin
+
+```
+/plugin install workproof --marketplace Bubblegunn/workproof
+```
+
+That one-step form works on Claude Code 2.1.275 or newer. On an older version, use two steps:
+
+```
+/plugin marketplace add Bubblegunn/workproof
+/plugin install workproof@workproof
+```
+
+The plugin adds one skill. When you ask the agent the question this tool answers, it runs `npx workproof` itself instead of estimating.
+
 ## How this differs
 
 git-fame and gitinspector also report per-author numbers from git. [docs/COMPARISON.md](docs/COMPARISON.md) holds the measured comparison: each tool was run on the same fixture repositories on 2026-10-21, once with its defaults and once tuned by hand. These are the rows where workproof is ahead or ties:

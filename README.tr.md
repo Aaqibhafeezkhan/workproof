@@ -30,6 +30,21 @@ Bu bir verimlilik ölçütü değildir ve insanları sıralamaz. Hayatta kalanı
   <a href="https://www.bestpractices.dev/projects/15493"><img src="https://img.shields.io/cii/level/15493?style=flat-square&color=111111&label=openssf%20best%20practices" alt="OpenSSF Best Practices"></a>
 </p>
 
+### Claude Code eklentisi olarak
+
+```
+/plugin install workproof --marketplace Bubblegunn/workproof
+```
+
+Bu tek adımlı biçim Claude Code 2.1.275 ve üstünde çalışır. Daha eski sürümde iki adım kullanın:
+
+```
+/plugin marketplace add Bubblegunn/workproof
+/plugin install workproof@workproof
+```
+
+Eklenti tek bir beceri ekler. Aracın cevapladığı soruyu ajana sorduğunuzda ajan tahmin yürütmez, `npx workproof` komutunu kendisi çalıştırır.
+
 ## Bu aracın farkı
 
 git-fame ve gitinspector de git'ten kişi başına sayılar çıkarır. [docs/COMPARISON.md](docs/COMPARISON.md) ölçülmüş karşılaştırmayı içerir: her araç 2026-10-21 tarihinde aynı örnek depoda bir kez varsayılanlarıyla, bir kez elle ayarlanmış haliyle çalıştırıldı. Aşağıdakiler workproof'un önde olduğu ya da eşit olduğu satırlardır:

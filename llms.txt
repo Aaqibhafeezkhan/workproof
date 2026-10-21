@@ -3,6 +3,7 @@
 > workproof is a command-line tool that turns a private git repository into a report of one author's work, with a hash a reader can check and no source code in it.
 
 Install and run: `npx workproof` (Node 22 or newer, git). Licence: MIT. Repository: https://github.com/Bubblegunn/workproof
+Claude Code plugin: `/plugin install workproof --marketplace Bubblegunn/workproof` (adds one skill that runs the CLI).
 npm: https://www.npmjs.com/package/workproof
 
 ## Docs

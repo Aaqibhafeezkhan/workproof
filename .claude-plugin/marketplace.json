@@ -1,0 +1,17 @@
+{
+  "name": "workproof",
+  "owner": {
+    "name": "Efe Genc",
+    "url": "https://efe-genc-portfolio.vercel.app"
+  },
+  "description": "A skill that runs workproof to turn a private git repository into a hash-checked report of one author's work.",
+  "plugins": [
+    {
+      "name": "workproof",
+      "source": "./",
+      "description": "When you need evidence of your own work from a private repo, the agent runs workproof, then check and verify, instead of writing numbers by hand.",
+      "category": "development",
+      "keywords": ["engineering-report","git","verifiable","private-repo","portfolio","skills"]
+    }
+  ]
+}
