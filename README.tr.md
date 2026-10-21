@@ -32,7 +32,7 @@ Bu bir verimlilik ölçütü değildir ve insanları sıralamaz. Hayatta kalanı
 
 ## Bu aracın farkı
 
-git-fame ve gitinspector de git'ten kişi başına sayılar çıkarır. [docs/COMPARISON.md](docs/COMPARISON.md) ölçülmüş karşılaştırmayı içerir: her araç 2026-10-20 tarihinde aynı örnek depoda bir kez varsayılanlarıyla, bir kez elle ayarlanmış haliyle çalıştırıldı. Aşağıdakiler workproof'un önde olduğu ya da eşit olduğu satırlardır:
+git-fame ve gitinspector de git'ten kişi başına sayılar çıkarır. [docs/COMPARISON.md](docs/COMPARISON.md) ölçülmüş karşılaştırmayı içerir: her araç 2026-10-21 tarihinde aynı örnek depoda bir kez varsayılanlarıyla, bir kez elle ayarlanmış haliyle çalıştırıldı. Aşağıdakiler workproof'un önde olduğu ya da eşit olduğu satırlardır:
 
 - Hayatta kalan satırlar: git-fame 4.2.1, `-w -M --ignore-revs-file` verildiğinde `git blame` ile eşleşiyor; workproof ise varsayılan olarak `.git-blame-ignore-revs` dosyasını okuyor. gitinspector v0.5.1 iki çalıştırmada da `git blame` ile eşleşmedi.
 - Botlar: workproof saymadan önce bot commit'lerini çıkarır. git-fame 4.2.1 iki çalıştırmada da bir botu yazar olarak listeledi.
