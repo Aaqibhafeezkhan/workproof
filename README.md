@@ -30,7 +30,7 @@ It is not a productivity metric and does not rank people. It reports what surviv
 
 ## How this differs
 
-git-fame and gitinspector also report per-author numbers from git. [docs/COMPARISON.md](docs/COMPARISON.md) holds the measured comparison: each tool was run on the same fixture repositories on 2026-10-20, once with its defaults and once tuned by hand. These are the rows where workproof is ahead or ties:
+git-fame and gitinspector also report per-author numbers from git. [docs/COMPARISON.md](docs/COMPARISON.md) holds the measured comparison: each tool was run on the same fixture repositories on 2026-10-21, once with its defaults and once tuned by hand. These are the rows where workproof is ahead or ties:
 
 - Surviving lines: git-fame 4.2.1 matches `git blame` once it is given `-w -M --ignore-revs-file`; workproof reads `.git-blame-ignore-revs` by default. gitinspector v0.5.1 did not match `git blame` in either run.
 - Bots: workproof removes bot commits before counting. git-fame 4.2.1 listed a bot as an author in both runs.

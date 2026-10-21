@@ -1,6 +1,6 @@
 # How workproof compares
 
-Generated on 2026-10-20 on darwin/arm64 with Node v24.13.0 and git 2.50.1 (Apple Git-155), by `node bench/comparison/run.mjs` and `node bench/comparison/render.mjs`. Do not edit this page by hand: `test/comparison-doc.test.mjs` renders it again from `bench/comparison/results.json` and fails on any difference.
+Generated on 2026-10-21 on darwin/arm64 with Node v24.13.0 and git 2.50.1 (Apple Git-155), by `node bench/comparison/run.mjs` and `node bench/comparison/render.mjs`. Do not edit this page by hand: `test/comparison-doc.test.mjs` renders it again from `bench/comparison/results.json` and fails on any difference.
 
 Every tool is run twice on the same repository: once with its defaults, and once tuned by hand with the best flags it offers for the row. The verdict compares workproof with the tuned result, so a tool that does the job once tuned is a tie even when workproof needs no flags. Third-party code is run, never copied.
 
@@ -95,11 +95,11 @@ gitinspector's default total equals the expected total only by coincidence: gene
 
 | tool | milliseconds | vs workproof |
 |---|---|---|
-| workproof | 521 | |
-| git-fame | 364 | ours behind |
-| gitinspector | 478 | tie |
-| git-who | 53 | ours behind |
-| onefetch | 61 | ours behind |
+| workproof | 473 | |
+| git-fame | 285 | ours behind |
+| gitinspector | 387 | tie |
+| git-who | 43 | ours behind |
+| onefetch | 60 | ours behind |
 | git-quick-stats | did not run | not comparable |
 
 ### Puts private work on the GitHub contribution graph

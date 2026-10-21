@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "runDate": "2026-10-20",
+  "runDate": "2026-10-21",
   "machine": {
     "os": "darwin",
     "arch": "arm64",
@@ -453,23 +453,23 @@
       "title": "Wall-clock time on a real history (median of three runs, fixture B)",
       "kind": "timing",
       "ours": {
-        "ms": 521
+        "ms": 473
       },
       "tools": {
         "git-fame": {
-          "ms": 364,
+          "ms": 285,
           "verdict": "ours behind"
         },
         "gitinspector": {
-          "ms": 478,
+          "ms": 387,
           "verdict": "tie"
         },
         "git-who": {
-          "ms": 53,
+          "ms": 43,
           "verdict": "ours behind"
         },
         "onefetch": {
-          "ms": 61,
+          "ms": 60,
           "verdict": "ours behind"
         },
         "git-quick-stats": {
