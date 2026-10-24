@@ -668,7 +668,7 @@ report exists to expose, measured rather than asserted.
 ## Where it comes from
 
 The method is written up in
-[How to show engineering ownership when the repositories are private](https://efe-genc-portfolio.vercel.app/writing/showing-ownership-private-repositories/).
+[How to show engineering ownership when the repositories are private](https://efegenc.me/writing/showing-ownership-private-repositories/).
 The sampler and glob helpers are [surviving-lines](https://github.com/Bubblegunn/surviving-lines),
 workproof's only dependency. Degree of authorship follows Avelino, Hora and Valente
 (2016), major contributors follow Bird et al. (2011), and the absence factor is the CHAOSS

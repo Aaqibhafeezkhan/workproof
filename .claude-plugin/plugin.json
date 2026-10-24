@@ -4,7 +4,7 @@
   "description": "A skill that makes Claude Code run workproof to produce a verifiable engineering report from a git repository, including a private one, with a hash and no source code.",
   "author": {
     "name": "Efe Genc",
-    "url": "https://efe-genc-portfolio.vercel.app"
+    "url": "https://efegenc.me"
   },
   "homepage": "https://github.com/Bubblegunn/workproof",
   "repository": "https://github.com/Bubblegunn/workproof",

@@ -462,7 +462,7 @@ Hayatta kalmayı ve etkinliği ölçer; kaliteyi, incelemeyi, tasarımı ya da m
 ## Nereden geliyor
 
 Yöntem
-[How to show engineering ownership when the repositories are private](https://efe-genc-portfolio.vercel.app/writing/showing-ownership-private-repositories/)
+[How to show engineering ownership when the repositories are private](https://efegenc.me/writing/showing-ownership-private-repositories/)
 yazısında anlatılıyor. Örnekleyici ve glob yardımcıları workproof'un tek bağımlılığı olan
 [surviving-lines](https://github.com/Bubblegunn/surviving-lines) paketinden gelir. Yazarlık
 derecesi Avelino, Hora ve Valente (2016), ana katkıcı Bird ve ark. (2011), yokluk faktörü
