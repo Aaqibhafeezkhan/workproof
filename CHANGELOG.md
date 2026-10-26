@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.1 (unreleased)
+
+**surviving-lines 0.2.4 (#63).** The dependency moves from 0.1.7 to 0.2.4. The two functions workproof imports from
+it, `globToRegExp` and `inSample`, are byte-identical in both versions, so the sample and every figure are unchanged.
+The report hash for the same repository still changes, because the surviving-lines method line names the installed
+version and that line is hashed: the CI fixture moves from `b0331b67` to `3c39cc04`, and the two reports differ only
+in that version string. A report made with 0.7.0 still passes `check`, and `verify` on this version says "all figures
+reproduce" for it, because `verify` compares figure values, not method lines.
+
 ## 0.7.0 (2026-10-20)
 
 **Privacy fix: other people's names and logins no longer reach the report without `--emails`.** The "may be the same
