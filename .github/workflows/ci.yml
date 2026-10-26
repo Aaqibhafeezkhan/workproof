@@ -64,11 +64,13 @@ jobs:
           # The hash of the pinned fixture. It is pinned here on purpose, so that a change in the
           # report's identity has to be noticed and explained rather than drifting quietly.
           # Updating it is not routine: say in the commit why the report changed.
-          # Last change: b9f5f75e -> b0331b67 when surviving-lines went 0.1.1 to 0.1.7 (#23). The
+          # Last change: b0331b67 -> 3c39cc04 when surviving-lines went 0.1.7 to 0.2.4 (#63). The
           # method line records the dependency's version, the method line is part of the report,
           # and the report is what is hashed, so the identity moved for a real and correct reason.
-          # Verified by installing 0.1.1 again and getting b9f5f75e back.
-          WORKPROOF_EXPECT: b0331b6705b02fa3ff2c57b1563a9dd53418951ade371a5c2565b712c3028f97
+          # Verified: the 0.1.7 build still hashes b0331b67, and the two reports of the same fixture
+          # differ only in "surviving-lines 0.1.7" vs "surviving-lines 0.2.4" in that method line.
+          # Before that: b9f5f75e -> b0331b67 for 0.1.1 to 0.1.7 (#23).
+          WORKPROOF_EXPECT: 3c39cc0489923020c6e031826bac63d6b704275e7bb6acc9b16a3412f6db0b8d
   package:
     # The tarball people install, checked before a tag exists: exports, types, bin, and a real install.
     runs-on: ubuntu-latest
