@@ -1,6 +1,6 @@
 {
   "name": "workproof",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "workproof is a command-line tool that turns a private git repository into a report of one author's work, with a hash a reader can check and no source code in it.",
   "type": "module",
   "main": "./dist/src/index.js",

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.1 (unreleased)
+## 0.7.1 (2026-10-26)
 
 **surviving-lines 0.2.4 (#63).** The dependency moves from 0.1.7 to 0.2.4. The two functions workproof imports from
 it, `globToRegExp` and `inSample`, are byte-identical in both versions, so the sample and every figure are unchanged.

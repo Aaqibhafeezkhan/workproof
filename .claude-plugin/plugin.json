@@ -1,6 +1,6 @@
 {
   "name": "workproof",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "A skill that makes Claude Code run workproof to produce a verifiable engineering report from a git repository, including a private one, with a hash and no source code.",
   "author": {
     "name": "Efe Genc",
