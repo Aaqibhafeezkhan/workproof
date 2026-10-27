@@ -23,6 +23,7 @@ Bu bir verimlilik ölçütü değildir ve insanları sıralamaz. Hayatta kalanı
 
 <p align="center">
   <img src="https://img.shields.io/npm/v/workproof?style=flat-square&color=111111&label=npm" alt="npm">
+  <a href="https://www.npmjs.com/package/workproof"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FBubblegunn%2Fworkproof%2Fmetrics%2Fbadges%2Fnpm-week.json&style=flat-square" alt="npm downloads per week"></a>
   <img src="https://img.shields.io/github/actions/workflow/status/Bubblegunn/workproof/ci.yml?style=flat-square&color=111111&label=ci" alt="ci">
   <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
   <a href="https://doi.org/10.5281/zenodo.22394558"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22394558-111111?style=flat-square" alt="DOI"></a>
