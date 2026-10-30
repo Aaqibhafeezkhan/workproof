@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { readFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { basename, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
-import { analyseRepo, buildReport, renderMarkdown, verifyReport, checkReport, narrate, badgeFor, newFingerprintKey, writeStatement, signLocal, countersignStatement, signCountersignature, readCountersignature, COUNTERSIGN_PROVES, COUNTERSIGN_DOES_NOT_PROVE } from "./index.js";
+import { analyseRepo, buildReport, renderMarkdown, verifyReport, checkReport, narrate, badgeFor, newFingerprintKey, writeStatement, signLocal, countersignStatement, signCountersignature, readCountersignature, COUNTERSIGN_PROVES, COUNTERSIGN_DOES_NOT_PROVE, cardFor } from "./index.js";
 import type { Params, Report, RepoReport, CountersignatureReading } from "./index.js";
 
 const HELP = `usage: workproof [options] [--repo <dir>]...
@@ -30,6 +30,7 @@ Turn a git repository into a verifiable engineering report for one author, witho
   --emails               include author emails in the report (off by default)
   --narrate              append a model-written paragraph; needs WORKPROOF_API_URL, WORKPROOF_API_KEY, WORKPROOF_MODEL
   --badge                also write <out>.badge.json, a shields.io endpoint document
+  --card                 write light and dark SVG cards alongside the report
   --out <basename>       output basename (default: workproof-report)
   --format <mode>        output markdown, json, or both (default: both)
   --json                 print the JSON to stdout instead of writing files (legacy alias)
@@ -46,7 +47,7 @@ check --countersign reads that file and says who signed and what that does and d
 
 type OutputFormat = "both" | "markdown" | "json";
 
-interface Cli { params: Params; repos: string[]; out: string; format: OutputFormat; json: boolean; doNarrate: boolean; badge: boolean; verifyFile: string | undefined; checkFile: string | undefined; attestFile: string | undefined; localKey: string | undefined; countersignFile: string | undefined; signKey: string | undefined; signLabel: string | undefined; countersigns: string[]; allowedSigners: string | undefined }
+interface Cli { params: Params; repos: string[]; out: string; format: OutputFormat; json: boolean; doNarrate: boolean; badge: boolean; card: boolean; verifyFile: string | undefined; checkFile: string | undefined; attestFile: string | undefined; localKey: string | undefined; countersignFile: string | undefined; signKey: string | undefined; signLabel: string | undefined; countersigns: string[]; allowedSigners: string | undefined }
 
 export function parse(argv: string[]): Cli {
   const params: Params = { depth: 2, threshold: 0.5, minCommits: 5, paths: false, emails: false, exclusions: true, exclude: [], seed: "", copies: false };
@@ -57,6 +58,7 @@ export function parse(argv: string[]): Cli {
   let json = false;
   let doNarrate = false;
   let badge = false;
+  let card = false;
   let verifyFile: string | undefined;
   let checkFile: string | undefined;
   let attestFile: string | undefined;
@@ -130,6 +132,7 @@ export function parse(argv: string[]): Cli {
     else if (a === "--as") signLabel = next();
     else if (a === "--narrate") doNarrate = true;
     else if (a === "--badge") badge = true;
+    else if (a === "--card") card = true;
     else if (a === "--out") out = next();
     else if (a === "--format") {
       const value = next();
@@ -146,7 +149,7 @@ export function parse(argv: string[]): Cli {
   if (countersignFile && !signKey) throw new Error("countersign needs --key <ssh private key>");
   if (authors.length) params.author = authors;
   if (!repos.length) repos.push(process.cwd());
-  return { params, repos, out, format, json, doNarrate, badge, verifyFile, checkFile, attestFile, localKey, countersignFile, signKey, signLabel, countersigns, allowedSigners };
+  return { params, repos, out, format, json, doNarrate, badge, card, verifyFile, checkFile, attestFile, localKey, countersignFile, signKey, signLabel, countersigns, allowedSigners };
 }
 
 async function main() {
@@ -155,7 +158,9 @@ async function main() {
     return;
   }
   const started = Date.now();
-  const { params, repos, out, format, json, doNarrate, badge, verifyFile, checkFile, attestFile, localKey, countersignFile, signKey, signLabel, countersigns, allowedSigners } = parse(process.argv.slice(2));
+  const { params, repos, out, format, json, doNarrate, badge, card, verifyFile, checkFile, attestFile, localKey, countersignFile, signKey, signLabel, countersigns, allowedSigners } = parse(process.argv.slice(2));
+  if (card && format !== "both") throw new Error("--card requires --format both");
+
   const progress = (m: string) => process.stderr.write(`${m}\n`);
   const printIntegrity = (i: ReturnType<typeof checkReport>) => {
     const schemaProblems = i.problems.filter((p) => !p.startsWith("hash mismatch"));
@@ -276,6 +281,13 @@ async function main() {
     await writeFile(`${out}.badge.json`, JSON.stringify(badgeFor(report), null, 2));
     written.push(`${out}.badge.json`);
   }
+  if (card) {
+    const reportFilename = basename(`${out}.json`);
+    await writeFile(`${out}.card.svg`, cardFor(report, "light", reportFilename));
+    await writeFile(`${out}.card-dark.svg`, cardFor(report, "dark", reportFilename));
+    written.push(`${out}.card.svg`, `${out}.card-dark.svg`);
+  }
+
   for (const repo of report.repositories) {
     const split = repo.identity.possiblySplit;
     if (!split) continue;

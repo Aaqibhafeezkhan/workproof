@@ -322,6 +322,7 @@ workproof attest <report.json> [--local <ssh-key>]
 --emails                include author emails
 --narrate               append a model-written paragraph
 --badge                 also write <out>.badge.json, a shields.io endpoint document
+--card                  also write light and dark SVG profile cards
 --out <basename>        output basename (default: workproof-report)
 --format <mode>         write markdown, json, or both (default: both); json prints to stdout
 --json                  same as --format json
@@ -351,6 +352,46 @@ Commit it to a public repository (your portfolio, a gist) and point shields at t
 
 A badge is a claim, not evidence. Keep the JSON report next to it; the report is what a
 reader verifies, the badge is only how they find it.
+
+## Profile Cards
+
+The `--card` option generates light- and dark-theme SVG cards from the report. The cards are written locally and are not committed or hosted automatically.
+
+Generate the report and cards:
+
+```bash
+npx workproof --repo . --author "your-email@example.com" --out workproof-report --card
+```
+
+This writes:
+
+- `workproof-report.md`: the Markdown report.
+- `workproof-report.json`: the report data.
+- `workproof-report.card.svg`: the light-theme card.
+- `workproof-report.card-dark.svg`: the dark-theme card.
+
+### Display in a GitHub profile README
+
+Publish the generated SVG files somewhere accessible to GitHub. For example, you can place them in your own profile repository alongside its README.
+
+Embed the cards using `<picture>` to select the appropriate theme:
+
+```html
+<picture>
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="./workproof-report.card-dark.svg"
+  />
+  <img
+    alt="Workproof engineering report"
+    src="./workproof-report.card.svg"
+  />
+</picture>
+```
+
+Update the paths if the SVG files are stored elsewhere. Regenerate and republish the cards whenever you want to refresh the displayed figures.
+
+Profile cards never include file paths, email addresses, or source code, regardless of whether `--paths` or `--emails` are enabled.
 
 ## GitHub Action
 

@@ -9,6 +9,8 @@ dist/src/badge.d.ts
 dist/src/badge.js
 dist/src/canonical.d.ts
 dist/src/canonical.js
+dist/src/card.d.ts
+dist/src/card.js
 dist/src/cli.d.ts
 dist/src/cli.js
 dist/src/countersign.d.ts

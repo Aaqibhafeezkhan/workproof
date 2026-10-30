@@ -71,6 +71,7 @@ test("headings appear in the planned order and none was lost", () => {
     "Privacy",
     "Options",
     "Badge",
+    "Profile Cards",
     "GitHub Action",
     "When someone reformatted the code",
     "When you are two people",
