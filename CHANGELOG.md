@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.0 (unreleased)
+
+**`--card`: light and dark SVG profile cards (#62, by @shivam-070208).** `--card` writes two SVG cards next to the report, one per theme, with the headline figures read from the report. The cards never contain file paths, email addresses or source code, whatever `--paths` or `--emails` say, and they show only the file name of the report, not the `--out` directory. A `--sample` run shows the sampled share and says so. `--card` refuses a report with more than one repository. Thanks to Shivam Gupta for the feature and for the regression test that pins the directory name.
+
 ## 0.7.1 (2026-10-26)
 
 **surviving-lines 0.2.4 (#63).** The dependency moves from 0.1.7 to 0.2.4. The two functions workproof imports from
